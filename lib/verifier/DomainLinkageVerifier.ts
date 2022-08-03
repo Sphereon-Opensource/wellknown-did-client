@@ -64,7 +64,7 @@ export class DomainLinkageVerifier {
    */
   public async verifyDomainLinkage(args: IVerifyDomainLinkageArgs): Promise<IDomainLinkageValidation> {
     // DID document should have a service property
-    if (!args.didDocument.service) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property service is not present in the provided DID document' }) // TODO refactor to error messages file
+    if (!args.didDocument.service) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property service is not present in the provided DID document' })
 
     // Service property should contain 'LinkedDomains' types
     const linkedDomainsEndpointDescriptors: Array<ILinkedDomainsEndpointDescriptor> = args.didDocument.service.filter((service: ILinkedDomainsEndpointDescriptor) => service.type = ServiceTypesEnum.LINKED_DOMAINS)
@@ -154,12 +154,12 @@ export class DomainLinkageVerifier {
         if (credentialValidations.length === 0) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: `No credentials found for DID: ${args.didUrl}`})
 
         return Promise.allSettled(credentialValidations)
-          .then((results: Array<PromiseSettledResult<ICredentialValidation | undefined>>) => { // TODO undefined
+          .then((results: Array<PromiseSettledResult<ICredentialValidation | undefined>>) => {
             return {
               status: results.find((result: PromiseSettledResult<ICredentialValidation | undefined>) =>
-                  result.status === PromiseStatusEnum.REJECTED) ? ValidationStatusEnum.INVALID : ValidationStatusEnum.VALID, // TODO undefined
+                  result.status === PromiseStatusEnum.REJECTED) ? ValidationStatusEnum.INVALID : ValidationStatusEnum.VALID,
               credentials: results.map((result: PromiseSettledResult<ICredentialValidation | undefined>) =>
-                  result.status === PromiseStatusEnum.FULFILLED ? result.value : result.reason) // TODO undefined
+                  result.status === PromiseStatusEnum.FULFILLED ? result.value : result.reason)
         }
       });
     })
@@ -288,7 +288,7 @@ export class DomainLinkageVerifier {
       return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property alg is not present in JWT header'})
 
     // Additional members MUST NOT be present in the header
-    if (Object.getOwnPropertyNames(header).filter(property => !['kid', 'alg'].includes(property)).length > 0) // TODO enum and others?
+    if (Object.getOwnPropertyNames(header).filter(property => !['kid', 'alg'].includes(property)).length > 0)
       return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'JWT header contains additional properties' })
   }
 

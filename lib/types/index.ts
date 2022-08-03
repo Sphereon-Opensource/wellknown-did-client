@@ -43,7 +43,7 @@ export interface IIssueDidConfigurationResourceArgs {
 export interface IIssueDomainLinkageCredentialArgs {
   didUrl: string
   origin: string
-  issuanceDate?: Date | string // TODO give default
+  issuanceDate?: Date | string
   expirationDate: Date | string
   options: IIssueDomainLinkageCredentialOptions
 }

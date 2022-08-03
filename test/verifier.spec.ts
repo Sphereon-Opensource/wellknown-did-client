@@ -101,7 +101,7 @@ describe('Domain Linkage Verifier', () => {
       const endpointDescriptor = {
         id: DID,
         type: ServiceTypesEnum.LINKED_DOMAINS,
-        serviceEndpoint: ORIGIN, // TODO proper origin
+        serviceEndpoint: ORIGIN,
       };
 
       const result = await verifier.verifyEndpointDescriptor({ descriptor: endpointDescriptor });
