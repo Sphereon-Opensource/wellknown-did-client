@@ -116,7 +116,6 @@ export class DomainLinkageVerifier {
    * @param didUrl (Optional) Optional did for specific search.
    * @return {IResourceValidation}, The validation result.
    */
-  //public async verifyResource<T extends IDidConfigurationResource>(resource: T & StrictPropertyCheck<T, IDidConfigurationResource, 'Only allowed properties of IDidConfigurationResource'> | string, didUrl?: string): Promise<IResourceValidation> {
   public async verifyResource<T extends IVerifyResourceArgs>(args: T & StrictPropertyCheck<T, IVerifyResourceArgs, 'Only allowed properties of IVerifyResourceArgs'>): Promise<IResourceValidation> {
     let parsedDID: IParsedDID;
     if (args.didUrl) {
