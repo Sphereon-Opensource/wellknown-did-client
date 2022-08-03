@@ -5,5 +5,3 @@ import { DomainLinkageVerifier } from './verifier/DomainLinkageVerifier';
 export { DomainLinkageIssuer };
 export { DomainLinkageVerifier };
 export { types }
-
-
