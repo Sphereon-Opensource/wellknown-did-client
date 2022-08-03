@@ -1,7 +1,7 @@
 import nock from 'nock';
 
 import { CONTEXT_URLS } from '../lib/constants';
-import { IVerifyCallbackArgs, IVerifyCredentialResult, ServiceTypesEnum, ValidationStatusEnum } from '../lib/types';
+import { IVerifyCredentialResult, ServiceTypesEnum, ValidationStatusEnum } from '../lib/types';
 import { DomainLinkageVerifier } from '../lib/verifier/DomainLinkageVerifier';
 
 const DID = 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM';
@@ -64,13 +64,13 @@ const DID_CONFIGURATION = {
 
 let verifier: DomainLinkageVerifier;
 
-const verifyCallback = async (args: IVerifyCallbackArgs): Promise<IVerifyCredentialResult> => {
+const verifyCallback = async (): Promise<IVerifyCredentialResult> => {
   return { verified: true };
 };
 
 beforeAll(() => {
   verifier = new DomainLinkageVerifier({
-    verifySignatureCallback: (args: IVerifyCallbackArgs) => verifyCallback(args),
+    verifySignatureCallback: () => verifyCallback(),
     onlyValidateServiceDid: false,
   });
 });
@@ -89,6 +89,7 @@ describe('Domain Linkage Verifier', () => {
 
     const result = await verifier.setOnlyValidateServiceDid(true).verifyDomainLinkage({ didDocument: DOCUMENT });
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     expect(result.endpointDescriptors[0].resources[0].credentials.length).toEqual(1);
   });
@@ -348,6 +349,23 @@ describe('Domain Linkage Verifier', () => {
       ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'JWT payload contains additional properties' });
     });
 
-    // TODO signature test false
+    it('should reject credfential signature is invalid', async () => {
+      const verifyCallback = async (): Promise<IVerifyCredentialResult> => {
+        return { verified: false };
+      };
+
+      const verifier = new DomainLinkageVerifier({
+        verifySignatureCallback: () => verifyCallback(),
+        onlyValidateServiceDid: false,
+      });
+
+      await expect(
+          verifier.verifyDomainLinkageCredential({
+            credential:
+                'eyJhbGciOiJSUzI1NiIsImtpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNI3o2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSJ9.eyJleHAiOjE3NjQ4NzkxMzksImlzcyI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwibmJmIjoxNjA3MTEyNzM5LCJzdWIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9pZGVudGl0eS5mb3VuZGF0aW9uLy53ZWxsLWtub3duL2RpZC1jb25maWd1cmF0aW9uL3YxIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleTp6Nk1rb1RIc2dOTnJieThKekNOUTFpUkx5VzVRUTZSOFh1dTZBQThpZ0dyTVZQVU0iLCJvcmlnaW4iOiJodHRwczovL2lkZW50aXR5LmZvdW5kYXRpb24ifSwiZXhwaXJhdGlvbkRhdGUiOiIyMDI1LTEyLTA0VDE0OjEyOjE5LTA2OjAwIiwiaXNzdWFuY2VEYXRlIjoiMjAyMC0xMi0wNFQxNDoxMjoxOS0wNjowMCIsImlzc3VlciI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkRvbWFpbkxpbmthZ2VDcmVkZW50aWFsIl19fQ.YZnpPMAW3GdaPXC2YKoJ7Igt1OaVZKq09XZBkptyhxTAyHTkX2Ewtew-JKHKQjyDyabY3HAy1LUPoIQX0jrU0J82pIYT3k2o7nNTdLbxlgb49FcDn4czntt5SbY0m1XwrMaKEvV0bHQsYPxNTqjYsyySccgPfmvN9IT8gRS-M9a6MZQxuB3oEMrVOQ5Vco0bvTODXAdCTHibAk1FlvKz0r1vO5QMhtW4OlRrVTI7ibquf9Nim_ch0KeMMThFjsBDKetuDF71nUcL5sf7PCFErvl8ZVw3UK4NkZ6iM-XIRsLL6rXP2SnDUVovcldhxd_pyKEYviMHBOgBdoNP6fOgRQ',
+          })
+      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'Signature is invalid' });
+    })
+
   });
 });

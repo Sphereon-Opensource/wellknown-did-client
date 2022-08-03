@@ -258,10 +258,10 @@ describe('Domain Linkage Issuer', () => {
 
   it('should use the issue callback when using the setter', async () => {
     const COMPACT_JWT_DOMAIN_LINKAGE_CREDENTIAL = 'eyJhbG...';
-    const otherIssueCallback = async (args: IIssueCallbackArgs): Promise<ISignedDomainLinkageCredential | string> =>
+    const otherIssueCallback = async (): Promise<ISignedDomainLinkageCredential | string> =>
       COMPACT_JWT_DOMAIN_LINKAGE_CREDENTIAL;
     const issuer = new DomainLinkageIssuer({ issueCallback: (args: IIssueCallbackArgs) => issueCallback(args) }).setIssueCallback(
-      (args: IIssueCallbackArgs) => otherIssueCallback(args)
+      () => otherIssueCallback()
     );
 
     const args = {
