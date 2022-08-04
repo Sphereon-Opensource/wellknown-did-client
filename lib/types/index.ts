@@ -1,3 +1,8 @@
+import {
+  DIDDocument,
+  Service
+} from 'did-resolver'
+
 export interface IIssuerConfig {
   issueCallback: (args: IIssueCallbackArgs) => Promise<ISignedDomainLinkageCredential | string>
 }
@@ -73,59 +78,8 @@ export interface IVerifierConfig {
   onlyValidateServiceDid?: boolean
 }
 
-export type IDidDocument = {
-  '@context'?: 'https://www.w3.org/ns/did/v1' | string | Array<string>
-  id: string
-  alsoKnownAs?: Array<string>
-  controller?: string | Array<string>
-  verificationMethod?: VerificationMethod[]
-  service: Array<ILinkedDomainsEndpointDescriptor>
-} & {
-  [x in KeyCapabilitySection]?: (string | VerificationMethod)[]
-}
-
-export interface ILinkedDomainsEndpointDescriptor {
-  id: string
-  type: ServiceTypesEnum.LINKED_DOMAINS
-  serviceEndpoint: IServiceEndpoint | string
-}
-
 export interface IServiceEndpoint {
   origins: Array<string>
-}
-
-export type KeyCapabilitySection =
-    | 'authentication'
-    | 'assertionMethod'
-    | 'keyAgreement'
-    | 'capabilityInvocation'
-    | 'capabilityDelegation'
-
-export interface VerificationMethod {
-  id: string
-  type: string
-  controller: string
-  publicKeyBase58?: string
-  publicKeyBase64?: string
-  publicKeyJwk?: JsonWebKey
-  publicKeyHex?: string
-  publicKeyMultibase?: string
-  blockchainAccountId?: string
-  ethereumAddress?: string
-}
-
-export interface JsonWebKey extends Record<string, unknown> {
-  alg?: string
-  crv?: string
-  e?: string
-  ext?: boolean
-  key_ops?: string[]
-  kid?: string
-  kty: string
-  n?: string
-  use?: string
-  x?: string
-  y?: string
 }
 
 export interface IJsonWebTokenProofHeader {
@@ -151,11 +105,11 @@ export interface IVerifyCallbackArgs {
 }
 
 export interface IVerifyDomainLinkageArgs {
-  didDocument: IDidDocument
+  didDocument: DIDDocument
 }
 
 export interface IVerifyEndpointDescriptorArgs {
-  descriptor: ILinkedDomainsEndpointDescriptor
+  descriptor: Service
 }
 
 export interface IVerifyResourceArgs {

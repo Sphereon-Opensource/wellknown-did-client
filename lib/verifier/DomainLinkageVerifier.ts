@@ -7,7 +7,6 @@ import {
   IDomainLinkageValidation,
   IJsonWebTokenProofHeader,
   IJsonWebTokenProofPayload,
-  ILinkedDomainsEndpointDescriptor,
   IResourceValidation,
   IServiceEndpoint,
   ISignedDomainLinkageCredential,
@@ -24,6 +23,7 @@ import {
   ValidationStatusEnum,
 } from '../types';
 import { decodeToken, fetchWellKnownDidConfiguration } from '../utils';
+import { Service } from 'did-resolver/src/resolver';
 
 export class DomainLinkageVerifier {
   private readonly config: IVerifierConfig;
@@ -60,7 +60,7 @@ export class DomainLinkageVerifier {
   /**
    * Verifies the domain linkage from a DID document.
    *
-   * @param didDocument The DID document.
+   * @param args The arguments for verifying domain linkage.
    * @return {IDomainLinkageValidation}, The validation result.
    */
   public async verifyDomainLinkage(args: IVerifyDomainLinkageArgs): Promise<IDomainLinkageValidation> {
@@ -68,10 +68,10 @@ export class DomainLinkageVerifier {
     if (!args.didDocument.service) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property service is not present in the provided DID document' })
 
     // Service property should contain 'LinkedDomains' types
-    const linkedDomainsEndpointDescriptors: Array<ILinkedDomainsEndpointDescriptor> = args.didDocument.service.filter((service: ILinkedDomainsEndpointDescriptor) => service.type = ServiceTypesEnum.LINKED_DOMAINS)
+    const linkedDomainsEndpointDescriptors: Array<Service> = args.didDocument.service.filter((service: Service) => service.type = ServiceTypesEnum.LINKED_DOMAINS)
     if (linkedDomainsEndpointDescriptors.length === 0) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: `Property service does not contain any services with type: ${ServiceTypesEnum.LINKED_DOMAINS}` })
 
-    const descriptorValidations = linkedDomainsEndpointDescriptors.map((descriptor: ILinkedDomainsEndpointDescriptor) => this.verifyEndpointDescriptor({ descriptor }))
+    const descriptorValidations = linkedDomainsEndpointDescriptors.map((descriptor: Service) => this.verifyEndpointDescriptor({ descriptor }))
 
     return await Promise.allSettled(descriptorValidations)
       .then((results: Array<PromiseSettledResult<IDescriptorValidation>>) => {
@@ -209,7 +209,7 @@ export class DomainLinkageVerifier {
    *
    * @param descriptor The endpoint descriptor.
    */
-  private async verifyEndpointDescriptorStructure(descriptor: ILinkedDomainsEndpointDescriptor): Promise<void> {
+  private async verifyEndpointDescriptorStructure(descriptor: Service): Promise<void> {
     // The object MUST contain an id property
     if (!descriptor.id)
       return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property id is not present in the service' })
@@ -242,11 +242,13 @@ export class DomainLinkageVerifier {
 
     if (typeof descriptor.serviceEndpoint === 'object') {
       // The object serviceEndpoint property can be an object which MUST contain an origins property
-      if (!descriptor.serviceEndpoint.origins)
+      if (!descriptor.serviceEndpoint.hasOwnProperty('origins'))
         return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property serviceEndpoint does not contain an origins field' })
 
+
+
       // The object serviceEndpoint property should have origins
-      if (descriptor.serviceEndpoint.origins.length === 0)
+      if ((descriptor.serviceEndpoint as IServiceEndpoint).origins.length === 0)
         return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property origins does not contain any origins' })
 
       // The origins should be valid
@@ -401,13 +403,16 @@ export class DomainLinkageVerifier {
    *
    * @param descriptor The endpoint descriptor.
    */
-  private getOrigins(descriptor: ILinkedDomainsEndpointDescriptor): Array<string> {
+  private getOrigins(descriptor: Service): Array<string> {
     if (typeof descriptor.serviceEndpoint === 'string') {
       return [descriptor.serviceEndpoint]
     }
 
     if (typeof descriptor.serviceEndpoint === 'object') {
-      return descriptor.serviceEndpoint.origins
+      if (descriptor.serviceEndpoint.hasOwnProperty('origins')) {
+        return (descriptor.serviceEndpoint as IServiceEndpoint).origins
+      }
+
     }
 
     return []

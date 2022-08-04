@@ -47,11 +47,11 @@ const DOCUMENT = {
         origins: [ORIGIN, ORIGIN],
       },
     },
-    {
-      id: `${DID}#bar`,
-      type: ServiceTypesEnum.LINKED_DOMAINS,
-      serviceEndpoint: ORIGIN,
-    },
+    // {
+    //   id: `${DID}#bar`,
+    //   type: ServiceTypesEnum.LINKED_DOMAINS,
+    //   serviceEndpoint: ORIGIN,
+    // },
   ],
 };
 const DID_CONFIGURATION = {
@@ -171,7 +171,7 @@ describe('Domain Linkage Verifier', () => {
 
   describe('DID Configuration Resource', () => {
     it('should verify did configuration resource', async () => {
-      const result = await verifier.verifyResource({ resource: DID_CONFIGURATION });
+      const result = await verifier.verifyResource({ configuration: DID_CONFIGURATION });
 
       expect(result.status).toEqual(ValidationStatusEnum.VALID);
     });
@@ -179,14 +179,14 @@ describe('Domain Linkage Verifier', () => {
     it('should verify did configuration resource from well-known location', async () => {
       nock(ORIGIN).get('/.well-known/did-configuration.json').times(1).reply(200, DID_CONFIGURATION);
 
-      const result = await verifier.verifyResource({ resource: ORIGIN });
+      const result = await verifier.verifyResource({ origin: ORIGIN });
 
       expect(result.status).toEqual(ValidationStatusEnum.VALID);
     });
 
     it('should only verify specific dids', async () => {
       const result = await verifier.verifyResource({
-        resource: DID_CONFIGURATION,
+        configuration: DID_CONFIGURATION,
         did: 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
       });
 
@@ -194,7 +194,7 @@ describe('Domain Linkage Verifier', () => {
     });
 
     it('should verify all credentials when no did is provided', async () => {
-      const result = await verifier.verifyResource({ resource: DID_CONFIGURATION });
+      const result = await verifier.verifyResource({ configuration: DID_CONFIGURATION });
 
       expect(result.credentials?.length).toEqual(2);
     });
@@ -205,15 +205,15 @@ describe('Domain Linkage Verifier', () => {
         linked_dids: [],
       };
 
-      await expect(verifier.verifyResource({ resource })).rejects.toEqual({
+      await expect(verifier.verifyResource({ configuration: resource })).rejects.toEqual({
         status: ValidationStatusEnum.INVALID,
         message: 'Property linked_dids does not contain any domain linkage credentials',
       });
     });
 
     it('should be able to verify a did configuration resource from a well-known location', async () => {
-      const result = await verifier.verifyResource({ resource: 'https://identity.foundation' });
-      console.log(result);
+      const result = await verifier.verifyResource({ origin: 'https://identity.foundation' });
+      console.log(result); // TODO fix
     });
   });
 
