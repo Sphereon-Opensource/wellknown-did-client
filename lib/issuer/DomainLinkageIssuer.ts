@@ -72,9 +72,9 @@ export class DomainLinkageIssuer {
    */
   public async issueDomainLinkageCredential(args: IIssueDomainLinkageCredentialArgs): Promise<ISignedDomainLinkageCredential | string> {
     try {
-      parseDid(args.didUrl)
+      parseDid(args.did)
     } catch (error: unknown) {
-      return Promise.reject(Error('didUrl is not a valid did'))
+      return Promise.reject(Error('did is not a valid did'))
     }
 
     if (new URL(args.origin).origin !== args.origin) {
@@ -94,7 +94,7 @@ export class DomainLinkageIssuer {
         CONTEXT_URLS.W3C_CREDENTIALS_V1,
         CONTEXT_URLS.IDENTITY_FOUNDATION_WELL_KNOWN_DID
       ],
-      "issuer": args.didUrl,
+      "issuer": args.did,
       "issuanceDate": args.issuanceDate || new Date().toISOString(),
       "expirationDate": args.expirationDate,
       "type": [
@@ -102,7 +102,7 @@ export class DomainLinkageIssuer {
         "DomainLinkageCredential"
       ],
       "credentialSubject": {
-        "id": args.didUrl,
+        "id": args.did,
         "origin": args.origin
       },
     }

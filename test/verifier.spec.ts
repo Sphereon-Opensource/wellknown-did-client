@@ -187,13 +187,13 @@ describe('Domain Linkage Verifier', () => {
     it('should only verify specific dids', async () => {
       const result = await verifier.verifyResource({
         resource: DID_CONFIGURATION,
-        didUrl: 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
+        did: 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
       });
 
       expect(result.credentials?.length).toEqual(1);
     });
 
-    it('should verify all credentials when no didUrl is provided', async () => {
+    it('should verify all credentials when no did is provided', async () => {
       const result = await verifier.verifyResource({ resource: DID_CONFIGURATION });
 
       expect(result.credentials?.length).toEqual(2);

@@ -42,7 +42,7 @@ const issuer: DomainLinkageIssuer = new DomainLinkageIssuer({
 const args = {
   issuances: [
     {
-      didUrl: 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
+      did: 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
       origin: 'https://example.com',
       issuanceDate: new Date().toDateString(),
       expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
@@ -71,7 +71,7 @@ const issuer: DomainLinkageIssuer = new DomainLinkageIssuer({
 const args = {
   issuances: [
     {
-      didUrl: 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
+      did: 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
       origin: 'https://example.com',
       issuanceDate: new Date().toDateString(),
       expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),

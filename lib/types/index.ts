@@ -42,7 +42,7 @@ export interface IIssueDidConfigurationResourceArgs {
 }
 
 export interface IIssueDomainLinkageCredentialArgs {
-  didUrl: string
+  did: string
   origin: string
   issuanceDate?: Date | string
   expirationDate: Date | string
@@ -160,7 +160,7 @@ export interface IVerifyEndpointDescriptorArgs {
 
 export interface IVerifyResourceArgs {
   resource: IDidConfigurationResource | string,
-  didUrl?: string
+  did?: string
 }
 
 export interface IVerifyDomainLinkageCredentialArgs {

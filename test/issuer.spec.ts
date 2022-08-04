@@ -62,14 +62,14 @@ describe('Domain Linkage Issuer', () => {
     const args = {
       issuances: [
         {
-          didUrl: DID,
+          did: DID,
           origin: ORIGIN,
           issuanceDate: new Date().toISOString(),
           expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
           options: { proofFormat: ProofFormatTypesEnum.JSON_LD },
         },
         {
-          didUrl: DID,
+          did: DID,
           origin: ORIGIN,
           issuanceDate: new Date().toISOString(),
           expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
@@ -91,21 +91,21 @@ describe('Domain Linkage Issuer', () => {
     const args = {
       issuances: [
         {
-          didUrl: DID,
+          did: DID,
           origin: ORIGIN,
           issuanceDate: new Date().toISOString(),
           expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
           options: { proofFormat: ProofFormatTypesEnum.JSON_LD },
         },
         {
-          didUrl: DID,
+          did: DID,
           origin: ORIGIN,
           issuanceDate: new Date().toISOString(),
           expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
           options: { proofFormat: ProofFormatTypesEnum.JSON_WEB_TOKEN },
         },
       ],
-      configuration: ORIGIN,
+      origin: ORIGIN,
     };
 
     const resource = await issuer.issueDidConfigurationResource(args);
@@ -119,14 +119,14 @@ describe('Domain Linkage Issuer', () => {
     const args = {
       issuances: [
         {
-          didUrl: DID,
+          did: DID,
           origin: ORIGIN,
           issuanceDate: new Date().toISOString(),
           expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
           options: { proofFormat: ProofFormatTypesEnum.JSON_LD },
         },
       ],
-      configuration: ORIGIN,
+      origin: ORIGIN,
     };
 
     await expect(issuer.issueDidConfigurationResource(args)).rejects.toThrow('Unable to retrieve did configuration resource');
@@ -136,14 +136,14 @@ describe('Domain Linkage Issuer', () => {
     const args = {
       issuances: [
         {
-          didUrl: DID,
+          did: DID,
           origin: ORIGIN,
           issuanceDate: new Date().toISOString(),
           expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
           options: { proofFormat: ProofFormatTypesEnum.JSON_LD },
         },
         {
-          didUrl: DID,
+          did: DID,
           origin: ORIGIN,
           issuanceDate: new Date().toISOString(),
           expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
@@ -162,7 +162,7 @@ describe('Domain Linkage Issuer', () => {
 
   it('should issue a JSON web token credential', async () => {
     const args = {
-      didUrl: DID,
+      did: DID,
       origin: ORIGIN,
       issuanceDate: new Date().toISOString(),
       expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
@@ -178,7 +178,7 @@ describe('Domain Linkage Issuer', () => {
     const issuanceDate = new Date().toISOString();
     const expirationDate = new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString();
     const args = {
-      didUrl: DID,
+      did: DID,
       origin: ORIGIN,
       issuanceDate,
       expirationDate,
@@ -198,7 +198,7 @@ describe('Domain Linkage Issuer', () => {
 
   it('should use default issuanceDate when not provided', async () => {
     const args = {
-      didUrl: DID,
+      did: DID,
       origin: ORIGIN,
       expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
       options: { proofFormat: ProofFormatTypesEnum.JSON_LD },
@@ -208,21 +208,21 @@ describe('Domain Linkage Issuer', () => {
     expect(credential.issuanceDate).not.toBeNull();
   });
 
-  it('should throw error when didUrl is not a valid DID', async () => {
+  it('should throw error when did is not a valid DID', async () => {
     const args = {
-      didUrl: 'invalid_did',
+      did: 'invalid_did',
       origin: ORIGIN,
       issuanceDate: new Date().toISOString(),
       expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
       options: { proofFormat: ProofFormatTypesEnum.JSON_LD },
     };
 
-    await expect(issuer.issueDomainLinkageCredential(args)).rejects.toThrow('didUrl is not a valid did');
+    await expect(issuer.issueDomainLinkageCredential(args)).rejects.toThrow('did is not a valid did');
   });
 
   it('should throw error when origin is not a valid origin', async () => {
     const args = {
-      didUrl: DID,
+      did: DID,
       origin: `${ORIGIN}/path`,
       issuanceDate: new Date().toISOString(),
       expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
@@ -234,7 +234,7 @@ describe('Domain Linkage Issuer', () => {
 
   it('should throw error when issuanceDate is not a valid date', async () => {
     const args = {
-      didUrl: DID,
+      did: DID,
       origin: ORIGIN,
       issuanceDate: 'invalid_date',
       expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
@@ -246,7 +246,7 @@ describe('Domain Linkage Issuer', () => {
 
   it('should throw error when expirationDate is not a valid date', async () => {
     const args = {
-      didUrl: DID,
+      did: DID,
       origin: ORIGIN,
       issuanceDate: new Date().toISOString(),
       expirationDate: 'invalid_date',
@@ -265,7 +265,7 @@ describe('Domain Linkage Issuer', () => {
     );
 
     const args = {
-      didUrl: DID,
+      did: DID,
       origin: ORIGIN,
       issuanceDate: new Date().toISOString(),
       expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),

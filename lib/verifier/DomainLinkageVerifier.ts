@@ -94,7 +94,7 @@ export class DomainLinkageVerifier {
       const resourceValidations = this.getOrigins(args.descriptor)
         .map((origin: string) => fetchWellKnownDidConfiguration(origin)
           .catch((error: Error) => Promise.reject({ status: ValidationStatusEnum.INVALID, message: error.message}))
-          .then((didConfigurationResource: IDidConfigurationResource) => this.verifyResource({ resource: didConfigurationResource, didUrl: (this.config.onlyValidateServiceDid) ? args.descriptor.id : undefined }))
+          .then((didConfigurationResource: IDidConfigurationResource) => this.verifyResource({ resource: didConfigurationResource, did: (this.config.onlyValidateServiceDid) ? args.descriptor.id : undefined }))
       )
 
       return await Promise.allSettled(resourceValidations)
@@ -113,16 +113,16 @@ export class DomainLinkageVerifier {
    * Verifies the DID configuration resource.
    *
    * @param resource The DID configuration resource or a string representing the origin of a location.
-   * @param didUrl (Optional) Optional did for specific search.
+   * @param did (Optional) Optional did for specific search.
    * @return {IResourceValidation}, The validation result.
    */
   public async verifyResource<T extends IVerifyResourceArgs>(args: T & StrictPropertyCheck<T, IVerifyResourceArgs, 'Only allowed properties of IVerifyResourceArgs'>): Promise<IResourceValidation> {
     let parsedDID: IParsedDID;
-    if (args.didUrl) {
+    if (args.did) {
       try {
-        parsedDID = parseDid(args.didUrl)
+        parsedDID = parseDid(args.did)
       } catch (error: unknown) {
-        return Promise.reject(Error('didUrl is not a valid did'))
+        return Promise.reject(Error('did is not a valid did'))
       }
     }
 
@@ -150,7 +150,7 @@ export class DomainLinkageVerifier {
           })
           .map((credential: ISignedDomainLinkageCredential | string) => this.verifyDomainLinkageCredential({ credential }))
 
-        if (credentialValidations.length === 0) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: `No credentials found for DID: ${args.didUrl}`})
+        if (credentialValidations.length === 0) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: `No credentials found for DID: ${args.did}`})
 
         return Promise.allSettled(credentialValidations)
           .then((results: Array<PromiseSettledResult<ICredentialValidation | undefined>>) => {
