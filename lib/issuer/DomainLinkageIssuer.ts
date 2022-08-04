@@ -39,14 +39,21 @@ export class DomainLinkageIssuer {
    * @return {IDidConfigurationResource}, issuance result.
    */
   public async issueDidConfigurationResource(args: IIssueDidConfigurationResourceArgs): Promise<IDidConfigurationResource> {
-    const didConfigurationResource: IDidConfigurationResource = (args.configuration) ?
-        (typeof args.configuration === 'string')
-            ? await fetchWellKnownDidConfiguration(args.configuration)
-            : args.configuration
-        : {
-          '@context': CONTEXT_URLS.IDENTITY_FOUNDATION_WELL_KNOWN_DID,
-          'linked_dids': new Array<ISignedDomainLinkageCredential | string>()
-        }
+    if (args.configuration && args.origin) {
+      return Promise.reject(Error('Cannot supply both a configuration and an origin. Only one should be supplied at the same time.'))
+    }
+
+    let didConfigurationResource: IDidConfigurationResource;
+    if (args.configuration) {
+      didConfigurationResource = args.configuration
+    } else if (args.origin) {
+      didConfigurationResource = await fetchWellKnownDidConfiguration(args.origin)
+    } else {
+      didConfigurationResource = {
+        '@context': CONTEXT_URLS.IDENTITY_FOUNDATION_WELL_KNOWN_DID,
+        'linked_dids': new Array<ISignedDomainLinkageCredential | string>()
+      }
+    }
 
     const credentials: Array<ISignedDomainLinkageCredential | string> = await Promise.all(args.issuances.map((issuance: IIssueDomainLinkageCredentialArgs) =>
         this.issueDomainLinkageCredential(issuance))

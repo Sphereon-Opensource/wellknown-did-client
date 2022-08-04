@@ -37,7 +37,8 @@ export interface ICredentialSubject {
 
 export interface IIssueDidConfigurationResourceArgs {
   issuances: Array<IIssueDomainLinkageCredentialArgs>
-  configuration?: IDidConfigurationResource | string
+  configuration?: IDidConfigurationResource
+  origin?: string
 }
 
 export interface IIssueDomainLinkageCredentialArgs {
