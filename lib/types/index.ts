@@ -159,7 +159,8 @@ export interface IVerifyEndpointDescriptorArgs {
 }
 
 export interface IVerifyResourceArgs {
-  resource: IDidConfigurationResource | string,
+  configuration?: IDidConfigurationResource
+  origin?: string
   did?: string
 }
 

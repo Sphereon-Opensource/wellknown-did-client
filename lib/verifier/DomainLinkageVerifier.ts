@@ -15,7 +15,8 @@ import {
   IVerifyCredentialResult,
   IVerifyDomainLinkageArgs,
   IVerifyDomainLinkageCredentialArgs,
-  IVerifyEndpointDescriptorArgs, IVerifyResourceArgs,
+  IVerifyEndpointDescriptorArgs,
+  IVerifyResourceArgs,
   PromiseStatusEnum,
   ProofFormatTypesEnum,
   ServiceTypesEnum,
@@ -94,7 +95,7 @@ export class DomainLinkageVerifier {
       const resourceValidations = this.getOrigins(args.descriptor)
         .map((origin: string) => fetchWellKnownDidConfiguration(origin)
           .catch((error: Error) => Promise.reject({ status: ValidationStatusEnum.INVALID, message: error.message}))
-          .then((didConfigurationResource: IDidConfigurationResource) => this.verifyResource({ resource: didConfigurationResource, did: (this.config.onlyValidateServiceDid) ? args.descriptor.id : undefined }))
+          .then((didConfigurationResource: IDidConfigurationResource) => this.verifyResource({ configuration: didConfigurationResource, did: (this.config.onlyValidateServiceDid) ? args.descriptor.id : undefined }))
       )
 
       return await Promise.allSettled(resourceValidations)
@@ -117,6 +118,14 @@ export class DomainLinkageVerifier {
    * @return {IResourceValidation}, The validation result.
    */
   public async verifyResource<T extends IVerifyResourceArgs>(args: T & StrictPropertyCheck<T, IVerifyResourceArgs, 'Only allowed properties of IVerifyResourceArgs'>): Promise<IResourceValidation> {
+    if (args.configuration && args.origin) {
+      return Promise.reject(Error('Cannot supply both a configuration and an origin. Only one should be supplied at the same time.'))
+    }
+
+    if (!args.configuration && !args.origin) {
+      return Promise.reject(Error('No did configuration resource or origin supplied . Supply a configuration or an secure well-known location'))
+    }
+
     let parsedDID: IParsedDID;
     if (args.did) {
       try {
@@ -126,13 +135,13 @@ export class DomainLinkageVerifier {
       }
     }
 
-    if (typeof args.resource === 'string') {
-      if (new URL(args.resource).protocol !== 'https:') return Promise.reject('origin is not secure')
+    if (args.origin) {
+      if (new URL(args.origin).protocol !== 'https:') return Promise.reject('origin is not secure')
     }
 
-    const didConfigurationResource: IDidConfigurationResource = (typeof args.resource === 'string')
-        ? await fetchWellKnownDidConfiguration(args.resource)
-        : args.resource
+    let didConfigurationResource: IDidConfigurationResource = (args.configuration)
+        ? args.configuration
+        : await fetchWellKnownDidConfiguration(args.origin!)
 
     return this.verifyResourceStructure(didConfigurationResource)
       .then(() => {
