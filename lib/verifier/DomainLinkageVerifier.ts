@@ -126,6 +126,10 @@ export class DomainLinkageVerifier {
       }
     }
 
+    if (typeof args.resource === 'string') {
+      if (new URL(args.resource).protocol !== 'https:') return Promise.reject('origin is not secure')
+    }
+
     const didConfigurationResource: IDidConfigurationResource = (typeof args.resource === 'string')
         ? await fetchWellKnownDidConfiguration(args.resource)
         : args.resource
@@ -223,6 +227,8 @@ export class DomainLinkageVerifier {
       // The object serviceEndpoint property can be a string and the value MUST be an origin string
       if (new URL(descriptor.serviceEndpoint).origin !== descriptor.serviceEndpoint)
         return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property serviceEndpoint does not contain a valid origin' })
+
+      if (new URL(descriptor.serviceEndpoint).protocol !== 'https:') return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property origin is not secure' })
     }
 
     if (typeof descriptor.serviceEndpoint === 'object') {
@@ -238,6 +244,8 @@ export class DomainLinkageVerifier {
       for (const origin of (descriptor.serviceEndpoint as IServiceEndpoint).origins) {
         if (new URL(origin).origin !== origin)
           return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property origins contains an invalid origins' })
+
+        if (new URL(origin).protocol !== 'https:') return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property origin is not secure' })
       }
     }
   }
