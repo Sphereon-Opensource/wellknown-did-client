@@ -117,10 +117,10 @@ export class WellKnownDidVerifier {
       return Promise.reject(Error('No did configuration resource or origin supplied . Supply a configuration or an secure well-known location'))
     }
 
-    let parsedDID: IParsedDID;
+    let parsedDid: IParsedDID;
     if (args.did) {
       try {
-        parsedDID = parseDid(args.did)
+        parsedDid = parseDid(args.did)
       } catch (error: unknown) {
         return Promise.reject(Error('did is not a valid did'))
       }
@@ -138,7 +138,7 @@ export class WellKnownDidVerifier {
       .then(() => {
         const credentialValidations = didConfigurationResource.linked_dids
           .filter((item: ISignedDomainLinkageCredential | string) => {
-            if (!parsedDID) return true
+            if (!parsedDid) return true
             let credential: ISignedDomainLinkageCredential | Omit<ISignedDomainLinkageCredential, 'proof'>
             if (typeof item === 'string') {
               try {
@@ -150,7 +150,7 @@ export class WellKnownDidVerifier {
               credential = item
             }
 
-            return credential.credentialSubject.id === parsedDID.did
+            return credential.credentialSubject.id === parsedDid.did
           })
           .map((credential: ISignedDomainLinkageCredential | string) => this.verifyDomainLinkageCredential({ credential, verifySignatureCallback: args.verifySignatureCallback }))
 
