@@ -26,10 +26,10 @@ import {
 import { decodeToken, fetchWellKnownDidConfiguration } from '../utils';
 
 export class WellKnownDidVerifier {
-  private readonly config: IVerifierConfig;
+  private readonly config?: IVerifierConfig;
 
   /** Verifier constructor */
-  constructor(config: IVerifierConfig) {
+  constructor(config?: IVerifierConfig) {
     this.config = config
   }
 
@@ -40,6 +40,10 @@ export class WellKnownDidVerifier {
    * @return {IDomainLinkageValidation}, The validation result.
    */
   public async verifyDomainLinkage(args: IVerifyDomainLinkageArgs): Promise<IDomainLinkageValidation> {
+    if (!args.verifySignatureCallback && (!this.config || !this.config?.verifySignatureCallback)) {
+      return Promise.reject(Error('verifySignatureCallback needs to be supplied via parameter or config'))
+    }
+
     // DID document should have a service property
     if (!args.didDocument.service) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property service is not present in the provided DID document' })
 
@@ -71,11 +75,15 @@ export class WellKnownDidVerifier {
    * @return {IDescriptorValidation}, The validation result.
    */
   public async verifyEndpointDescriptor(args: IVerifyEndpointDescriptorArgs): Promise<IDescriptorValidation> {
+    if (!args.verifySignatureCallback && (!this.config || !this.config?.verifySignatureCallback)) {
+      return Promise.reject(Error('verifySignatureCallback needs to be supplied via parameter or config'))
+    }
+
     return this.verifyEndpointDescriptorStructure(args.descriptor).then(async () => {
       const resourceValidations = this.getOrigins(args.descriptor)
         .map((origin: string) => fetchWellKnownDidConfiguration(origin)
           .catch((error: Error) => Promise.reject({ status: ValidationStatusEnum.INVALID, message: error.message}))
-          .then((didConfigurationResource: IDidConfigurationResource) => this.verifyResource({ configuration: didConfigurationResource, did: (this.config.onlyValidateServiceDid || args.onlyValidateServiceDid) ? args.descriptor.id : undefined, verifySignatureCallback: args.verifySignatureCallback }))
+          .then((didConfigurationResource: IDidConfigurationResource) => this.verifyResource({ configuration: didConfigurationResource, did: (this.config!.onlyValidateServiceDid || args.onlyValidateServiceDid) ? args.descriptor.id : undefined, verifySignatureCallback: args.verifySignatureCallback }))
       )
 
       return await Promise.allSettled(resourceValidations)
@@ -97,6 +105,10 @@ export class WellKnownDidVerifier {
    * @return {IResourceValidation}, The validation result.
    */
   public async verifyResource<T extends IVerifyResourceArgs>(args: T & StrictPropertyCheck<T, IVerifyResourceArgs, 'Only allowed properties of IVerifyResourceArgs'>): Promise<IResourceValidation> {
+    if (!args.verifySignatureCallback && (!this.config || !this.config?.verifySignatureCallback)) {
+      return Promise.reject(Error('verifySignatureCallback needs to be supplied via parameter or config'))
+    }
+
     if (args.configuration && args.origin) {
       return Promise.reject(Error('Cannot supply both a configuration and an origin. Only one should be supplied at the same time.'))
     }
@@ -163,12 +175,16 @@ export class WellKnownDidVerifier {
    * @return {ICredentialValidation}, The validation result.
    */
   public async verifyDomainLinkageCredential(args: IVerifyDomainLinkageCredentialArgs): Promise<ICredentialValidation> {
+    if (!args.verifySignatureCallback && (!this.config || !this.config?.verifySignatureCallback)) {
+      return Promise.reject(Error('verifySignatureCallback needs to be supplied via parameter or config'))
+    }
+
     if (typeof args.credential === 'string') {
       return this.verifyJsonWebTokenProofFormat(args.credential)
         .then(() => this.verifyDomainLinkageCredentialStructure((decodeToken(args.credential as string, false) as IJsonWebTokenProofPayload).vc))
         .then(() => (args.verifySignatureCallback)
-            ? args.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_LD })
-            : this.config.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_LD }))
+            ? args.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_WEB_TOKEN })
+            : this.config!.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_WEB_TOKEN }))
         .then((verificationResult: IVerifyCredentialResult) => {
           if (!verificationResult.verified) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Signature is invalid'})
 
@@ -177,7 +193,9 @@ export class WellKnownDidVerifier {
     }
 
     return this.verifyDomainLinkageCredentialStructure(args.credential as ISignedDomainLinkageCredential)
-      .then(() => this.config.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_LD }))
+      .then(() => (args.verifySignatureCallback)
+          ? args.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_LD })
+          : this.config!.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_LD }))
       .then((verificationResult: IVerifyCredentialResult) => {
         if (!verificationResult.verified) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Signature is invalid'})
 

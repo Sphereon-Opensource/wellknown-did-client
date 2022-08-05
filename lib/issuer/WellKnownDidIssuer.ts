@@ -12,10 +12,10 @@ import {
 import { fetchWellKnownDidConfiguration } from '../utils';
 
 export class WellKnownDidIssuer {
-  private readonly config: IIssuerConfig;
+  private readonly config?: IIssuerConfig;
 
   /** Issuer constructor */
-  constructor(config: IIssuerConfig) {
+  constructor(config?: IIssuerConfig) {
     this.config = config
   }
 
@@ -28,6 +28,10 @@ export class WellKnownDidIssuer {
   public async issueDidConfigurationResource(args: IIssueDidConfigurationResourceArgs): Promise<IDidConfigurationResource> {
     if (args.configuration && args.origin) {
       return Promise.reject(Error('Cannot supply both a configuration and an origin. Only one should be supplied at the same time.'))
+    }
+
+    if (!args.issueCallback && (!this.config || !this.config?.issueCallback)) {
+      return Promise.reject(Error('issueCallback needs to be supplied via parameter or config'))
     }
 
     let didConfigurationResource: IDidConfigurationResource;
@@ -58,6 +62,10 @@ export class WellKnownDidIssuer {
    * @return {ILinkedDataDomainLinkageCredential | string}, issuance result.
    */
   public async issueDomainLinkageCredential(args: IIssueDomainLinkageCredentialArgs): Promise<ISignedDomainLinkageCredential | string> {
+    if (!args.issueCallback && (!this.config || !this.config?.issueCallback)) {
+      return Promise.reject(Error('issueCallback needs to be supplied via parameter or config'))
+    }
+
     try {
       parseDid(args.did)
     } catch (error: unknown) {
@@ -96,7 +104,7 @@ export class WellKnownDidIssuer {
 
     return (args.issueCallback)
         ? await args.issueCallback({ credential, proofFormat: args.options.proofFormat })
-        : await this.config.issueCallback({ credential, proofFormat: args.options.proofFormat })
+        : await this.config!.issueCallback({ credential, proofFormat: args.options.proofFormat })
   }
 
 }
