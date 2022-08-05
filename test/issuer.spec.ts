@@ -1,7 +1,16 @@
 import nock from 'nock';
 
 import { WellKnownDidIssuer } from '../lib/issuer/WellKnownDidIssuer';
-import { IIssueCallbackArgs, ISignedDomainLinkageCredential, ProofFormatTypesEnum } from '../lib/types';
+import {
+  IDidConfigurationResource,
+  IIssueCallbackArgs,
+  IIssueDidConfigurationResourceArgs,
+  IIssueDomainLinkageCredentialArgs,
+  ISignedDomainLinkageCredential,
+  ProofFormatTypesEnum
+} from '../lib/types';
+
+import { VcJsIssuer } from './resources/issuers/VcJsIssuer';
 
 const COMPACT_JWT_DOMAIN_LINKAGE_CREDENTIAL =
   'eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNI3o2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSJ9.eyJleHAiOjE3NjQ4NzkxMzksImlzcyI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwibmJmIjoxNjA3MTEyNzM5LCJzdWIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9pZGVudGl0eS5mb3VuZGF0aW9uLy53ZWxsLWtub3duL2RpZC1jb25maWd1cmF0aW9uL3YxIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleTp6Nk1rb1RIc2dOTnJieThKekNOUTFpUkx5VzVRUTZSOFh1dTZBQThpZ0dyTVZQVU0iLCJvcmlnaW4iOiJpZGVudGl0eS5mb3VuZGF0aW9uIn0sImV4cGlyYXRpb25EYXRlIjoiMjAyNS0xMi0wNFQxNDoxMjoxOS0wNjowMCIsImlzc3VhbmNlRGF0ZSI6IjIwMjAtMTItMDRUMTQ6MTI6MTktMDY6MDAiLCJpc3N1ZXIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJEb21haW5MaW5rYWdlQ3JlZGVudGlhbCJdfX0.aUFNReA4R5rcX_oYm3sPXqWtso_gjPHnWZsB6pWcGv6m3K8-4JIAvFov3ZTM8HxPOrOL17Qf4vBFdY9oK0HeCQ';
@@ -59,7 +68,7 @@ beforeAll(() => {
 
 describe('Domain Linkage Issuer', () => {
   it('should issue a DID configuration resource with multiple types of credentials', async () => {
-    const args = {
+    const args: IIssueDidConfigurationResourceArgs = {
       issuances: [
         {
           did: DID,
@@ -88,7 +97,7 @@ describe('Domain Linkage Issuer', () => {
   it('should issue a new DID configuration resource based on existing one, using an origin', async () => {
     nock(ORIGIN).get('/.well-known/did-configuration.json').times(1).reply(200, DID_CONFIGURATION);
 
-    const args = {
+    const args: IIssueDidConfigurationResourceArgs = {
       issuances: [
         {
           did: DID,
@@ -108,7 +117,7 @@ describe('Domain Linkage Issuer', () => {
       origin: ORIGIN,
     };
 
-    const resource = await issuer.issueDidConfigurationResource(args);
+    const resource: IDidConfigurationResource = await issuer.issueDidConfigurationResource(args);
 
     expect(resource).not.toBeNull();
     expect(resource.linked_dids).not.toBeNull();
@@ -116,7 +125,7 @@ describe('Domain Linkage Issuer', () => {
   });
 
   it('should throw error when origins DID configuration resource is not accessible', async () => {
-    const args = {
+    const args: IIssueDidConfigurationResourceArgs = {
       issuances: [
         {
           did: DID,
@@ -133,7 +142,7 @@ describe('Domain Linkage Issuer', () => {
   });
 
   it('should issue a new DID configuration resource based on existing one, using a did configuration', async () => {
-    const args = {
+    const args: IIssueDidConfigurationResourceArgs = {
       issuances: [
         {
           did: DID,
@@ -153,7 +162,7 @@ describe('Domain Linkage Issuer', () => {
       configuration: DID_CONFIGURATION,
     };
 
-    const resource = await issuer.issueDidConfigurationResource(args);
+    const resource: IDidConfigurationResource = await issuer.issueDidConfigurationResource(args);
 
     expect(resource).not.toBeNull();
     expect(resource.linked_dids).not.toBeNull();
@@ -161,7 +170,7 @@ describe('Domain Linkage Issuer', () => {
   });
 
   it('should issue a JSON web token credential', async () => {
-    const args = {
+    const args: IIssueDomainLinkageCredentialArgs = {
       did: DID,
       origin: ORIGIN,
       issuanceDate: new Date().toISOString(),
@@ -169,7 +178,7 @@ describe('Domain Linkage Issuer', () => {
       options: { proofFormat: ProofFormatTypesEnum.JSON_WEB_TOKEN },
     };
 
-    const credential = await issuer.issueDomainLinkageCredential(args);
+    const credential: string = await issuer.issueDomainLinkageCredential(args) as string;
 
     expect(credential).toEqual(COMPACT_JWT_DOMAIN_LINKAGE_CREDENTIAL);
   });
@@ -177,7 +186,7 @@ describe('Domain Linkage Issuer', () => {
   it('should issue a linked data credential', async () => {
     const issuanceDate = new Date().toISOString();
     const expirationDate = new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString();
-    const args = {
+    const args: IIssueDomainLinkageCredentialArgs = {
       did: DID,
       origin: ORIGIN,
       issuanceDate,
@@ -197,7 +206,7 @@ describe('Domain Linkage Issuer', () => {
   });
 
   it('should use default issuanceDate when not provided', async () => {
-    const args = {
+    const args: IIssueDomainLinkageCredentialArgs = {
       did: DID,
       origin: ORIGIN,
       expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
@@ -209,7 +218,7 @@ describe('Domain Linkage Issuer', () => {
   });
 
   it('should throw error when did is not a valid DID', async () => {
-    const args = {
+    const args: IIssueDomainLinkageCredentialArgs = {
       did: 'invalid_did',
       origin: ORIGIN,
       issuanceDate: new Date().toISOString(),
@@ -221,7 +230,7 @@ describe('Domain Linkage Issuer', () => {
   });
 
   it('should throw error when origin is not a valid origin', async () => {
-    const args = {
+    const args: IIssueDomainLinkageCredentialArgs = {
       did: DID,
       origin: `${ORIGIN}/path`,
       issuanceDate: new Date().toISOString(),
@@ -233,7 +242,7 @@ describe('Domain Linkage Issuer', () => {
   });
 
   it('should throw error when issuanceDate is not a valid date', async () => {
-    const args = {
+    const args: IIssueDomainLinkageCredentialArgs = {
       did: DID,
       origin: ORIGIN,
       issuanceDate: 'invalid_date',
@@ -245,7 +254,7 @@ describe('Domain Linkage Issuer', () => {
   });
 
   it('should throw error when expirationDate is not a valid date', async () => {
-    const args = {
+    const args: IIssueDomainLinkageCredentialArgs = {
       did: DID,
       origin: ORIGIN,
       issuanceDate: new Date().toISOString(),
@@ -255,5 +264,27 @@ describe('Domain Linkage Issuer', () => {
 
     await expect(issuer.issueDomainLinkageCredential(args)).rejects.toThrow('expirationDate is not a valid date');
   });
+
+  it('should issue vc with vc-js', async () => {
+    const args: IIssueDomainLinkageCredentialArgs = {
+      did: DID,
+      origin: ORIGIN,
+      expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
+      options: { proofFormat: ProofFormatTypesEnum.JSON_LD },
+    };
+
+    const issueVcJsCallback = async (args: IIssueCallbackArgs): Promise<ISignedDomainLinkageCredential | string> => {
+      return await new VcJsIssuer().issue(args)
+    };
+
+    const issuer: WellKnownDidIssuer = new WellKnownDidIssuer({
+      issueCallback: (args: IIssueCallbackArgs) => issueVcJsCallback(args),
+    });
+
+    const result: ISignedDomainLinkageCredential = await issuer.issueDomainLinkageCredential(args) as ISignedDomainLinkageCredential
+
+    expect(result).not.toBeNull();
+    expect(result.proof).not.toBeNull();
+  })
 
 });
