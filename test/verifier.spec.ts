@@ -1,8 +1,15 @@
 import nock from 'nock';
 
 import { CONTEXT_URLS } from '../lib/constants';
-import { IVerifyCredentialResult, ServiceTypesEnum, ValidationStatusEnum } from '../lib/types';
+import {
+  IVerifyCallbackArgs,
+  IVerifyCredentialResult,
+  ServiceTypesEnum,
+  ValidationStatusEnum
+} from '../lib/types';
 import { WellKnownDidVerifier } from '../lib/verifier/WellKnownDidVerifier';
+
+import { VcJsVerifier } from './resources/verifiers/VcJsVerifier';
 
 const DID = 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM';
 const ORIGIN = 'https://example.com';
@@ -47,11 +54,11 @@ const DOCUMENT = {
         origins: [ORIGIN, ORIGIN],
       },
     },
-    // {
-    //   id: `${DID}#bar`,
-    //   type: ServiceTypesEnum.LINKED_DOMAINS,
-    //   serviceEndpoint: ORIGIN,
-    // },
+    {
+      id: `${DID}#bar`,
+      type: ServiceTypesEnum.LINKED_DOMAINS,
+      serviceEndpoint: ORIGIN,
+    },
   ],
 };
 const DID_CONFIGURATION = {
@@ -364,6 +371,46 @@ describe('Domain Linkage Verifier', () => {
           credential:
             'eyJhbGciOiJSUzI1NiIsImtpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNI3o2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSJ9.eyJleHAiOjE3NjQ4NzkxMzksImlzcyI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwibmJmIjoxNjA3MTEyNzM5LCJzdWIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9pZGVudGl0eS5mb3VuZGF0aW9uLy53ZWxsLWtub3duL2RpZC1jb25maWd1cmF0aW9uL3YxIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleTp6Nk1rb1RIc2dOTnJieThKekNOUTFpUkx5VzVRUTZSOFh1dTZBQThpZ0dyTVZQVU0iLCJvcmlnaW4iOiJodHRwczovL2lkZW50aXR5LmZvdW5kYXRpb24ifSwiZXhwaXJhdGlvbkRhdGUiOiIyMDI1LTEyLTA0VDE0OjEyOjE5LTA2OjAwIiwiaXNzdWFuY2VEYXRlIjoiMjAyMC0xMi0wNFQxNDoxMjoxOS0wNjowMCIsImlzc3VlciI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkRvbWFpbkxpbmthZ2VDcmVkZW50aWFsIl19fQ.YZnpPMAW3GdaPXC2YKoJ7Igt1OaVZKq09XZBkptyhxTAyHTkX2Ewtew-JKHKQjyDyabY3HAy1LUPoIQX0jrU0J82pIYT3k2o7nNTdLbxlgb49FcDn4czntt5SbY0m1XwrMaKEvV0bHQsYPxNTqjYsyySccgPfmvN9IT8gRS-M9a6MZQxuB3oEMrVOQ5Vco0bvTODXAdCTHibAk1FlvKz0r1vO5QMhtW4OlRrVTI7ibquf9Nim_ch0KeMMThFjsBDKetuDF71nUcL5sf7PCFErvl8ZVw3UK4NkZ6iM-XIRsLL6rXP2SnDUVovcldhxd_pyKEYviMHBOgBdoNP6fOgRQ',
         })
+      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'Signature is invalid' });
+    });
+
+    it('should verify vc with vc-js', async () => {
+      const verifyVcJsCallback = async (args: IVerifyCallbackArgs): Promise<IVerifyCredentialResult> => {
+        return await new VcJsVerifier().verify(args);
+      };
+
+      const verifier: WellKnownDidVerifier = new WellKnownDidVerifier({
+        verifySignatureCallback: (args: IVerifyCallbackArgs) => verifyVcJsCallback(args),
+      });
+
+      const signedCredential = {
+        '@context': [
+          'https://www.w3.org/2018/credentials/v1',
+          'https://identity.foundation/.well-known/did-configuration/v1'
+        ],
+        'issuer': 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
+        'issuanceDate': '2020-12-04T14:08:28-06:00',
+        'expirationDate': '2025-12-04T14:08:28-06:00',
+        'type': [
+          'VerifiableCredential',
+          'DomainLinkageCredential'
+        ],
+        'credentialSubject': {
+          'id': 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
+          'origin': 'https://identity.foundation'
+        },
+        'proof': {
+          'type': 'Ed25519Signature2018',
+          'created': '2020-12-04T20:08:28.540Z',
+          'jws': 'eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..D0eDhglCMEjxDV9f_SNxsuU-r3ZB9GR4vaM9TYbyV7yzs1WfdUyYO8rFZdedHbwQafYy8YOpJ1iJlkSmB4JaDQ',
+          'proofPurpose': 'assertionMethod',
+          'verificationMethod': 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM#z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM'
+        }
+      }
+
+      // Will throw signature is invalid as this is just a test to check the integration
+      await expect(
+          verifier.verifyDomainLinkageCredential({ credential: signedCredential })
       ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'Signature is invalid' });
     });
   });
