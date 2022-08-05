@@ -66,11 +66,7 @@ export class WellKnownDidIssuer {
       return Promise.reject(Error('issueCallback needs to be supplied via parameter or config'))
     }
 
-    try {
-      parseDid(args.did)
-    } catch (error: unknown) {
-      return Promise.reject(Error('did is not a valid did'))
-    }
+    parseDid(args.did)
 
     if (new URL(args.origin).origin !== args.origin) {
       return Promise.reject(Error('origin is not a valid origin'))

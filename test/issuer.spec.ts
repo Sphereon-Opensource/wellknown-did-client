@@ -217,7 +217,7 @@ describe('Domain Linkage Issuer', () => {
       options: { proofFormat: ProofFormatTypesEnum.JSON_LD },
     };
 
-    await expect(issuer.issueDomainLinkageCredential(args)).rejects.toThrow('did is not a valid did');
+    await expect(issuer.issueDomainLinkageCredential(args)).rejects.toThrow('invalid did');
   });
 
   it('should throw error when origin is not a valid origin', async () => {

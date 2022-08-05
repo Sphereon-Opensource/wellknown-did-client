@@ -119,11 +119,7 @@ export class WellKnownDidVerifier {
 
     let parsedDid: IParsedDID;
     if (args.did) {
-      try {
-        parsedDid = parseDid(args.did)
-      } catch (error: unknown) {
-        return Promise.reject(Error('did is not a valid did'))
-      }
+      parsedDid = parseDid(args.did)
     }
 
     if (args.origin) {
