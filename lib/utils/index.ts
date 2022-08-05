@@ -11,7 +11,7 @@ import { IDidConfigurationResource, ValidationStatusEnum } from '../types';
  * @param verifyResource
  * @return {IDidConfigurationResource}, DID configuration resource.
  */
-export const fetchWellKnownDidConfiguration = async (origin: string): Promise<IDidConfigurationResource> => {
+export const fetchWellKnownDidConfiguration = async (origin: string, verifyResource = true): Promise<IDidConfigurationResource> => {
   const url = `${origin}${WELL_KNOWN_DID_URI}`;
 
   return fetch(url)
@@ -19,6 +19,8 @@ export const fetchWellKnownDidConfiguration = async (origin: string): Promise<ID
       if (response.status >= 400) {
         return Promise.reject(Error(`Unable to retrieve did configuration resource from ${url}`))
       }
+
+      if (!verifyResource) return response.json()
 
       return response.json()
         .then((resource: IDidConfigurationResource) => verifyResourceStructure(resource)
