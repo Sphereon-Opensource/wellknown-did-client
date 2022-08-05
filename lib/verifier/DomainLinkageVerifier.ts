@@ -87,7 +87,7 @@ export class DomainLinkageVerifier {
   /**
    * Verifies the endpoint descriptor.
    *
-   * @param descriptor The endpoint descriptor.
+   * @param args The arguments to verify the descriptor.
    * @return {IDescriptorValidation}, The validation result.
    */
   public async verifyEndpointDescriptor(args: IVerifyEndpointDescriptorArgs): Promise<IDescriptorValidation> {
@@ -113,8 +113,7 @@ export class DomainLinkageVerifier {
   /**
    * Verifies the DID configuration resource.
    *
-   * @param resource The DID configuration resource or a string representing the origin of a location.
-   * @param did (Optional) Optional did for specific search.
+   * @param args The arguments to verify the resource.
    * @return {IResourceValidation}, The validation result.
    */
   public async verifyResource<T extends IVerifyResourceArgs>(args: T & StrictPropertyCheck<T, IVerifyResourceArgs, 'Only allowed properties of IVerifyResourceArgs'>): Promise<IResourceValidation> {
