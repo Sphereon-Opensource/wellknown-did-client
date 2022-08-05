@@ -7,7 +7,7 @@ import {
   IIssueDidConfigurationResourceArgs,
   IIssueDomainLinkageCredentialArgs,
   ISignedDomainLinkageCredential,
-  ProofFormatTypesEnum
+  ProofFormatTypesEnum,
 } from '../lib/types';
 
 import { VcJsIssuer } from './resources/issuers/VcJsIssuer';
@@ -178,7 +178,7 @@ describe('Domain Linkage Issuer', () => {
       options: { proofFormat: ProofFormatTypesEnum.JSON_WEB_TOKEN },
     };
 
-    const credential: string = await issuer.issueDomainLinkageCredential(args) as string;
+    const credential: string = (await issuer.issueDomainLinkageCredential(args)) as string;
 
     expect(credential).toEqual(COMPACT_JWT_DOMAIN_LINKAGE_CREDENTIAL);
   });
@@ -292,17 +292,16 @@ describe('Domain Linkage Issuer', () => {
     };
 
     const issueVcJsCallback = async (args: IIssueCallbackArgs): Promise<ISignedDomainLinkageCredential | string> => {
-      return await new VcJsIssuer().issue(args)
+      return await new VcJsIssuer().issue(args);
     };
 
     const issuer: WellKnownDidIssuer = new WellKnownDidIssuer({
       issueCallback: (args: IIssueCallbackArgs) => issueVcJsCallback(args),
     });
 
-    const result: ISignedDomainLinkageCredential = await issuer.issueDomainLinkageCredential(args) as ISignedDomainLinkageCredential
+    const result: ISignedDomainLinkageCredential = (await issuer.issueDomainLinkageCredential(args)) as ISignedDomainLinkageCredential;
 
     expect(result).not.toBeNull();
     expect(result.proof).not.toBeNull();
-  })
-
+  });
 });

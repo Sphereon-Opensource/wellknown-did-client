@@ -5,17 +5,17 @@ export class DocumentLoader {
   getLoader() {
     return extendContextLoader(async (url: string) => {
       try {
-        const response = await fetch(url)
+        const response = await fetch(url);
         if (response.status === 200) {
-          const document = await response.json()
+          const document = await response.json();
           return {
             contextUrl: null,
             documentUrl: url,
             document,
-          }
+          };
         }
       } catch (error: any) {
-        throw new Error(error)
+        throw new Error(error);
       }
 
       const { defaultDocumentLoader } = vc;

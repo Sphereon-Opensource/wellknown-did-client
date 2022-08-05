@@ -23,7 +23,11 @@ import {
   StrictPropertyCheck,
   ValidationStatusEnum,
 } from '../types';
-import { decodeToken, fetchWellKnownDidConfiguration } from '../utils';
+import {
+  decodeToken,
+  fetchWellKnownDidConfiguration,
+  verifyResourceStructure
+} from '../utils';
 
 export class WellKnownDidVerifier {
   private readonly config?: IVerifierConfig;
@@ -127,41 +131,39 @@ export class WellKnownDidVerifier {
     }
 
     const didConfigurationResource: IDidConfigurationResource = (args.configuration)
-        ? args.configuration
+        ? await verifyResourceStructure(args.configuration).then(() => args.configuration!)
         : await fetchWellKnownDidConfiguration(args.origin!)
 
-    return this.verifyResourceStructure(didConfigurationResource)
-      .then(() => {
-        const credentialValidations = didConfigurationResource.linked_dids
-          .filter((item: ISignedDomainLinkageCredential | string) => {
-            if (!did) return true
-            let credential: ISignedDomainLinkageCredential | Omit<ISignedDomainLinkageCredential, 'proof'>
-            if (typeof item === 'string') {
-              try {
-                credential = (decodeToken(item, false) as IJsonWebTokenProofPayload).vc
-              } catch (error: unknown) {
-                return true
-              }
-            } else {
-              credential = item
-            }
 
-            return credential.credentialSubject.id === did
-          })
-          .map((credential: ISignedDomainLinkageCredential | string) => this.verifyDomainLinkageCredential({ credential, verifySignatureCallback: args.verifySignatureCallback }))
-
-        if (credentialValidations.length === 0) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: `No credentials found for DID: ${args.did}`})
-
-        return Promise.allSettled(credentialValidations)
-          .then((results: Array<PromiseSettledResult<ICredentialValidation | undefined>>) => {
-            return {
-              status: results.find((result: PromiseSettledResult<ICredentialValidation | undefined>) =>
-                  result.status === PromiseStatusEnum.REJECTED) ? ValidationStatusEnum.INVALID : ValidationStatusEnum.VALID,
-              credentials: results.map((result: PromiseSettledResult<ICredentialValidation | undefined>) =>
-                  result.status === PromiseStatusEnum.FULFILLED ? result.value : result.reason)
+    const credentialValidations = didConfigurationResource.linked_dids
+      .filter((item: ISignedDomainLinkageCredential | string) => {
+        if (!did) return true
+        let credential: ISignedDomainLinkageCredential | Omit<ISignedDomainLinkageCredential, 'proof'>
+        if (typeof item === 'string') {
+          try {
+            credential = (decodeToken(item, false) as IJsonWebTokenProofPayload).vc
+          } catch (error: unknown) {
+            return true
+          }
+        } else {
+          credential = item
         }
-      });
-    })
+
+        return credential.credentialSubject.id === did
+      })
+      .map((credential: ISignedDomainLinkageCredential | string) => this.verifyDomainLinkageCredential({ credential, verifySignatureCallback: args.verifySignatureCallback }))
+
+    if (credentialValidations.length === 0) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: `No credentials found for DID: ${args.did}`})
+
+    return Promise.allSettled(credentialValidations)
+    .then((results: Array<PromiseSettledResult<ICredentialValidation | undefined>>) => {
+      return {
+        status: results.find((result: PromiseSettledResult<ICredentialValidation | undefined>) =>
+            result.status === PromiseStatusEnum.REJECTED) ? ValidationStatusEnum.INVALID : ValidationStatusEnum.VALID,
+        credentials: results.map((result: PromiseSettledResult<ICredentialValidation | undefined>) =>
+            result.status === PromiseStatusEnum.FULFILLED ? result.value : result.reason)
+      }
+    });
   }
 
   /**
@@ -254,25 +256,25 @@ export class WellKnownDidVerifier {
     }
   }
 
-  /**
-   * Verifies the DID configuration resource object structure.
-   *
-   * @param resource The DID configuration resource.
-   */
-  private async verifyResourceStructure(resource: IDidConfigurationResource): Promise<void> {
-    // @context MUST be present.
-    if (!resource['@context']) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property @context is not present' })
-
-    // linked_dids MUST be present.
-    if (!resource.linked_dids) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property linked_dids is not present' })
-
-    // The value of linked_dids MUST be an array of DomainLinkageCredential entries.
-    if (resource.linked_dids.length === 0) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property linked_dids does not contain any domain linkage credentials' })
-
-    // Additional members MUST NOT be present in the header
-    if (Object.getOwnPropertyNames(resource).filter(property => !['@context', 'linked_dids'].includes(property)).length > 0)
-      return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Resource contains additional properties' })
-  }
+  // /**
+  //  * Verifies the DID configuration resource object structure.
+  //  *
+  //  * @param resource The DID configuration resource.
+  //  */
+  // private async verifyResourceStructure(resource: IDidConfigurationResource): Promise<void> {
+  //   // @context MUST be present.
+  //   if (!resource['@context']) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property @context is not present' })
+  //
+  //   // linked_dids MUST be present.
+  //   if (!resource.linked_dids) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property linked_dids is not present' })
+  //
+  //   // The value of linked_dids MUST be an array of DomainLinkageCredential entries.
+  //   if (resource.linked_dids.length === 0) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property linked_dids does not contain any domain linkage credentials' })
+  //
+  //   // Additional members MUST NOT be present in the header
+  //   if (Object.getOwnPropertyNames(resource).filter(property => !['@context', 'linked_dids'].includes(property)).length > 0)
+  //     return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Resource contains additional properties' })
+  // }
 
   /**
    * Verifies the structure of a JWT domain linkage credential.

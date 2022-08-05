@@ -2,7 +2,7 @@ import fetch from 'cross-fetch';
 import jwt_decode, { JwtHeader, JwtPayload } from 'jwt-decode';
 
 import { WELL_KNOWN_DID_URI } from '../constants';
-import { IDidConfigurationResource } from '../types';
+import { IDidConfigurationResource, ValidationStatusEnum } from '../types';
 
 /**
  * Fetches a DID configuration resource from a given origin.
@@ -19,11 +19,34 @@ export const fetchWellKnownDidConfiguration = async (origin: string): Promise<ID
       if (response.status >= 400) {
         return Promise.reject(Error(`Unable to retrieve did configuration resource from ${url}`))
       }
-      return response.json();
+
+      return response.json()
+        .then((resource: IDidConfigurationResource) => verifyResourceStructure(resource)
+        .then(() => resource))
     })
-  .catch(() => {
+    .catch(() => {
       return Promise.reject(Error(`Unable to retrieve did configuration resource from ${url}`))
     });
+}
+
+/**
+ * Verifies the DID configuration resource object structure.
+ *
+ * @param resource The DID configuration resource.
+ */
+export const verifyResourceStructure = async (resource: IDidConfigurationResource): Promise<void> => {
+  // @context MUST be present.
+  if (!resource['@context']) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property @context is not present' })
+
+  // linked_dids MUST be present.
+  if (!resource.linked_dids) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property linked_dids is not present' })
+
+  // The value of linked_dids MUST be an array of DomainLinkageCredential entries.
+  if (resource.linked_dids.length === 0) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property linked_dids does not contain any domain linkage credentials' })
+
+  // Additional members MUST NOT be present in the header
+  if (Object.getOwnPropertyNames(resource).filter(property => !['@context', 'linked_dids'].includes(property)).length > 0)
+    return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Resource contains additional properties' })
 }
 
 /**
