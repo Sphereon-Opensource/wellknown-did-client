@@ -75,6 +75,7 @@ export interface IDidConfigurationResource {
 
 export interface IVerifierConfig {
   verifySignatureCallback: (args: IVerifyCallbackArgs) => Promise<IVerifyCredentialResult>
+  // Option to only verify dids mentioned in the service endpoint descriptor
   onlyValidateServiceDid?: boolean
 }
 
