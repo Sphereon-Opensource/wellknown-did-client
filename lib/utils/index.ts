@@ -17,7 +17,7 @@ export const fetchWellKnownDidConfiguration = async (origin: string, verifyResou
   return fetch(url)
     .then((response: Response) => {
       if (response.status >= 400) {
-        return Promise.reject(Error(`Unable to retrieve did configuration resource from ${url}`))
+        return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Unable to retrieve did configuration resource from ${url}' })
       }
 
       if (!verifyResource) return response.json()
@@ -27,7 +27,7 @@ export const fetchWellKnownDidConfiguration = async (origin: string, verifyResou
         .then(() => resource))
     })
     .catch(() => {
-      return Promise.reject(Error(`Unable to retrieve did configuration resource from ${url}`))
+      return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Unable to retrieve did configuration resource from ${url}' })
     });
 }
 

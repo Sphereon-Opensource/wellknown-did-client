@@ -86,8 +86,13 @@ export class WellKnownDidVerifier {
     return this.verifyEndpointDescriptorStructure(args.descriptor).then(async () => {
       const resourceValidations = this.getOrigins(args.descriptor)
         .map((origin: string) => fetchWellKnownDidConfiguration(origin)
-          .catch((error: Error) => Promise.reject({ status: ValidationStatusEnum.INVALID, message: error.message}))
-          .then((didConfigurationResource: IDidConfigurationResource) => this.verifyResource({ configuration: didConfigurationResource, did: (this.config!.onlyValidateServiceDid || args.onlyValidateServiceDid) ? args.descriptor.id : undefined, verifySignatureCallback: args.verifySignatureCallback }))
+          .then((didConfigurationResource: IDidConfigurationResource) =>
+              this.verifyResource({
+                configuration: didConfigurationResource,
+                did: (this.config!.onlyValidateServiceDid || args.onlyValidateServiceDid)
+                    ? args.descriptor.id
+                    : undefined, verifySignatureCallback: args.verifySignatureCallback
+              }))
       )
 
       return await Promise.allSettled(resourceValidations)
