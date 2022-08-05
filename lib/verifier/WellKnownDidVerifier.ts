@@ -244,7 +244,7 @@ export class WellKnownDidVerifier {
 
     if (typeof descriptor.serviceEndpoint === 'object') {
       // The object serviceEndpoint property can be an object which MUST contain an origins property
-      if (!descriptor.serviceEndpoint.hasOwnProperty('origins'))
+      if (!Object.prototype.hasOwnProperty.call(descriptor.serviceEndpoint, 'origins'))
         return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property serviceEndpoint does not contain an origins field' })
 
       // The object serviceEndpoint property should have origins
@@ -260,26 +260,6 @@ export class WellKnownDidVerifier {
       }
     }
   }
-
-  // /**
-  //  * Verifies the DID configuration resource object structure.
-  //  *
-  //  * @param resource The DID configuration resource.
-  //  */
-  // private async verifyResourceStructure(resource: IDidConfigurationResource): Promise<void> {
-  //   // @context MUST be present.
-  //   if (!resource['@context']) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property @context is not present' })
-  //
-  //   // linked_dids MUST be present.
-  //   if (!resource.linked_dids) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property linked_dids is not present' })
-  //
-  //   // The value of linked_dids MUST be an array of DomainLinkageCredential entries.
-  //   if (resource.linked_dids.length === 0) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property linked_dids does not contain any domain linkage credentials' })
-  //
-  //   // Additional members MUST NOT be present in the header
-  //   if (Object.getOwnPropertyNames(resource).filter(property => !['@context', 'linked_dids'].includes(property)).length > 0)
-  //     return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Resource contains additional properties' })
-  // }
 
   /**
    * Verifies the structure of a JWT domain linkage credential.
@@ -409,10 +389,9 @@ export class WellKnownDidVerifier {
     }
 
     if (typeof descriptor.serviceEndpoint === 'object') {
-      if (descriptor.serviceEndpoint.hasOwnProperty('origins')) {
+      if (Object.prototype.hasOwnProperty.call(descriptor.serviceEndpoint, 'origins')) {
         return (descriptor.serviceEndpoint as IServiceEndpoint).origins
       }
-
     }
 
     return []
