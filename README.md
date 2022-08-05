@@ -1,14 +1,14 @@
 <h1 align="center">
   <br>
   <a href="https://www.sphereon.com"><img src="https://sphereon.com/content/themes/sphereon/assets/img/logo.svg" alt="Sphereon" width="400"></a>
-  <br>Domain linkage client
+  <br>Wellknown-dids client
   <br>
 </h1>
 
-[![CI](https://github.com/Sphereon-Opensource/domain-linkage-client/actions/workflows/main.yml/badge.svg)](https://github.com/Sphereon-Opensource/domain-linkage-client/actions/workflows/main.yml)  [![codecov](https://codecov.io/gh/Sphereon-Opensource/domain-linkage-client/branch/develop/graph/badge.svg?token=9P1JGUYA35)](https://codecov.io/gh/Sphereon-Opensource/domain-linkage-client) [![NPM Version](https://img.shields.io/npm/v/@sphereon/domain-linkage-client.svg)](https://npm.im/@sphereon/domain-linkage-client)
+[![CI](https://github.com/Sphereon-Opensource/wellknown-dids-client/actions/workflows/main.yml/badge.svg)](https://github.com/Sphereon-Opensource/wellknown-dids-client/actions/workflows/main.yml)  [![codecov](https://codecov.io/gh/Sphereon-Opensource/wellknown-dids-client/branch/develop/graph/badge.svg?token=9P1JGUYA35)](https://codecov.io/gh/Sphereon-Opensource/wellknown-dids-client) [![NPM Version](https://img.shields.io/npm/v/@sphereon/wellknown-dids-client.svg)](https://npm.im/@sphereon/wellknown-dids-client)
 
-### Domain-linkage-client
-The domain-linkage-client is a library to create DID configuration resources and domain linkage credentials and to be able to verify these. 
+### Wellknown-dids client
+The wellknown-dids-client is a library to create DID configuration resources and domain linkage credentials and to be able to verify these. 
 It is written in Typescript and can be compiled to any target JavaScript version.
 
 ### Supported actions
@@ -29,7 +29,7 @@ For the domain linkage verifier a verify callback is required that does the sign
 
 ##### DID configuration resource creation
  ```typescript
-import { DomainLinkageIssuer } from '@sphereon/domain-linkage-client';
+import { DomainLinkageIssuer } from '@sphereon/wellknown-dids-client';
 
 const issueCallback = async (args: IIssueCallbackArgs): Promise<any> => {
     return 'eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNI3o2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSJ9.eyJleHAiOjE3NjQ4NzkxMzksImlzcyI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwibmJmIjoxNjA3MTEyNzM5LCJzdWIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9pZGVudGl0eS5mb3VuZGF0aW9uLy53ZWxsLWtub3duL2RpZC1jb25maWd1cmF0aW9uL3YxIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleTp6Nk1rb1RIc2dOTnJieThKekNOUTFpUkx5VzVRUTZSOFh1dTZBQThpZ0dyTVZQVU0iLCJvcmlnaW4iOiJpZGVudGl0eS5mb3VuZGF0aW9uIn0sImV4cGlyYXRpb25EYXRlIjoiMjAyNS0xMi0wNFQxNDoxMjoxOS0wNjowMCIsImlzc3VhbmNlRGF0ZSI6IjIwMjAtMTItMDRUMTQ6MTI6MTktMDY6MDAiLCJpc3N1ZXIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJEb21haW5MaW5rYWdlQ3JlZGVudGlhbCJdfX0.aUFNReA4R5rcX_oYm3sPXqWtso_gjPHnWZsB6pWcGv6m3K8-4JIAvFov3ZTM8HxPOrOL17Qf4vBFdY9oK0HeCQ';
@@ -58,7 +58,7 @@ issuer.issueDidConfigurationResource(args)
 
 ##### Domain linkage credential creation
  ```typescript
-import { DomainLinkageIssuer } from '@sphereon/domain-linkage-client';
+import { DomainLinkageIssuer } from '@sphereon/wellknown-dids-client';
 
 const issueCallback = async (args: IIssueCallbackArgs): Promise<any> => {
   return 'eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNI3o2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSJ9.eyJleHAiOjE3NjQ4NzkxMzksImlzcyI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwibmJmIjoxNjA3MTEyNzM5LCJzdWIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9pZGVudGl0eS5mb3VuZGF0aW9uLy53ZWxsLWtub3duL2RpZC1jb25maWd1cmF0aW9uL3YxIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleTp6Nk1rb1RIc2dOTnJieThKekNOUTFpUkx5VzVRUTZSOFh1dTZBQThpZ0dyTVZQVU0iLCJvcmlnaW4iOiJpZGVudGl0eS5mb3VuZGF0aW9uIn0sImV4cGlyYXRpb25EYXRlIjoiMjAyNS0xMi0wNFQxNDoxMjoxOS0wNjowMCIsImlzc3VhbmNlRGF0ZSI6IjIwMjAtMTItMDRUMTQ6MTI6MTktMDY6MDAiLCJpc3N1ZXIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJEb21haW5MaW5rYWdlQ3JlZGVudGlhbCJdfX0.aUFNReA4R5rcX_oYm3sPXqWtso_gjPHnWZsB6pWcGv6m3K8-4JIAvFov3ZTM8HxPOrOL17Qf4vBFdY9oK0HeCQ';
@@ -87,7 +87,7 @@ issuer.issueDomainLinkageCredential(args)
 
 ##### Domain linkage verification
  ```typescript
-import { DomainLinkageVerifier } from '@sphereon/domain-linkage-client';
+import { DomainLinkageVerifier } from '@sphereon/wellknown-dids-client';
 
 const verifyCallback = async (args: IVerifyCallbackArgs): Promise<IVerifyCredentialResult> => {
   return { verified: true}
@@ -108,7 +108,7 @@ verifier.verifyDomainLinkage(didDoccument)
 
 ##### DID configuration resource verification
  ```typescript
-import { DomainLinkageVerifier } from '@sphereon/domain-linkage-client';
+import { DomainLinkageVerifier } from '@sphereon/wellknown-dids-client';
 
 const verifyCallback = async (args: IVerifyCallbackArgs): Promise<IVerifyCredentialResult> => {
   return { verified: true}

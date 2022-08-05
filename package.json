@@ -1,5 +1,5 @@
 {
-  "name": "@sphereon/domain-linkage-client",
+  "name": "@sphereon/wellknown-dids-client",
   "version": "0.1.0",
   "description": "",
   "main": "dist/index.js",
@@ -21,7 +21,7 @@
   ],
   "homepage": "https://sphereon.com",
   "repository": {
-    "url": "https://github.com/Sphereon-Opensource/domain-linkage-client.git"
+    "url": "https://github.com/Sphereon-Opensource/wellknown-dids-client.git"
   },
   "keywords": [
     "DID",
