@@ -66,7 +66,7 @@ export class WellKnownDidIssuer {
       return Promise.reject(Error('issueCallback needs to be supplied via parameter or config'))
     }
 
-    parseDid(args.did)
+    const did: string = parseDid(args.did).did
 
     if (new URL(args.origin).origin !== args.origin) {
       return Promise.reject(Error('origin is not a valid origin'))
@@ -85,7 +85,7 @@ export class WellKnownDidIssuer {
         CONTEXT_URLS.W3C_CREDENTIALS_V1,
         CONTEXT_URLS.IDENTITY_FOUNDATION_WELL_KNOWN_DID
       ],
-      "issuer": args.did,
+      "issuer": did,
       "issuanceDate": args.issuanceDate || new Date().toISOString(),
       "expirationDate": args.expirationDate,
       "type": [
@@ -93,7 +93,7 @@ export class WellKnownDidIssuer {
         "DomainLinkageCredential"
       ],
       "credentialSubject": {
-        "id": args.did,
+        "id": did,
         "origin": args.origin
       },
     }

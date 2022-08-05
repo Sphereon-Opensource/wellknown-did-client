@@ -205,6 +205,24 @@ describe('Domain Linkage Issuer', () => {
     expect(credential.proof).not.toBeNull();
   });
 
+  it('should issue vc with did without fragments', async () => {
+    const issuanceDate = new Date().toISOString();
+    const expirationDate = new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString();
+    const args: IIssueDomainLinkageCredentialArgs = {
+      did: `${DID}#foo`,
+      origin: ORIGIN,
+      issuanceDate,
+      expirationDate,
+      options: { proofFormat: ProofFormatTypesEnum.JSON_LD },
+    };
+
+    const credential: ISignedDomainLinkageCredential = (await issuer.issueDomainLinkageCredential(args)) as ISignedDomainLinkageCredential;
+
+    expect(credential).not.toBeNull();
+    expect(credential.credentialSubject.id).toEqual(DID);
+    expect(credential.issuer).toEqual(DID);
+  });
+
   it('should use default issuanceDate when not provided', async () => {
     const args: IIssueDomainLinkageCredentialArgs = {
       did: DID,

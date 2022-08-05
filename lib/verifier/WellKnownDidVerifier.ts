@@ -1,4 +1,4 @@
-import { IParsedDID, parseDid } from '@sphereon/ssi-sdk-core';
+import { parseDid } from '@sphereon/ssi-sdk-core';
 import { Service } from 'did-resolver/lib/resolver';
 
 import {
@@ -117,9 +117,9 @@ export class WellKnownDidVerifier {
       return Promise.reject(Error('No did configuration resource or origin supplied . Supply a configuration or an secure well-known location'))
     }
 
-    let parsedDid: IParsedDID;
+    let did: string;
     if (args.did) {
-      parsedDid = parseDid(args.did)
+      did = parseDid(args.did).did
     }
 
     if (args.origin) {
@@ -134,7 +134,7 @@ export class WellKnownDidVerifier {
       .then(() => {
         const credentialValidations = didConfigurationResource.linked_dids
           .filter((item: ISignedDomainLinkageCredential | string) => {
-            if (!parsedDid) return true
+            if (!did) return true
             let credential: ISignedDomainLinkageCredential | Omit<ISignedDomainLinkageCredential, 'proof'>
             if (typeof item === 'string') {
               try {
@@ -146,7 +146,7 @@ export class WellKnownDidVerifier {
               credential = item
             }
 
-            return credential.credentialSubject.id === parsedDid.did
+            return credential.credentialSubject.id === did
           })
           .map((credential: ISignedDomainLinkageCredential | string) => this.verifyDomainLinkageCredential({ credential, verifySignatureCallback: args.verifySignatureCallback }))
 
