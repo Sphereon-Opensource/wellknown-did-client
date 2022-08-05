@@ -4,7 +4,6 @@ import { CONTEXT_URLS } from '../constants';
 import {
   IDidConfigurationResource,
   IDomainLinkageCredential,
-  IIssueCallbackArgs,
   IIssueDidConfigurationResourceArgs,
   IIssueDomainLinkageCredentialArgs,
   IIssuerConfig,
@@ -12,24 +11,12 @@ import {
 } from '../types';
 import { fetchWellKnownDidConfiguration } from '../utils';
 
-export class DomainLinkageIssuer {
+export class WellKnownDidIssuer {
   private readonly config: IIssuerConfig;
 
   /** Issuer constructor */
   constructor(config: IIssuerConfig) {
     this.config = config
-  }
-
-  /**
-   * Sets the issue credential callback for the issuer.
-   *
-   * @param callback The issue credential callback for the issuer.
-   * @return this.
-   */
-  public setIssueCallback(callback: (args: IIssueCallbackArgs) => Promise<ISignedDomainLinkageCredential | string>): this {
-    this.config.issueCallback = callback
-
-    return this;
   }
 
   /**
@@ -107,7 +94,9 @@ export class DomainLinkageIssuer {
       },
     }
 
-    return await this.config.issueCallback({ credential, proofFormat: args.options.proofFormat })
+    return (args.issueCallback)
+        ? await args.issueCallback({ credential, proofFormat: args.options.proofFormat })
+        : await this.config.issueCallback({ credential, proofFormat: args.options.proofFormat })
   }
 
 }

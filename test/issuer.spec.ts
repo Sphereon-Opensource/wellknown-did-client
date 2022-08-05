@@ -1,6 +1,6 @@
 import nock from 'nock';
 
-import { DomainLinkageIssuer } from '../lib/issuer/DomainLinkageIssuer';
+import { WellKnownDidIssuer } from '../lib/issuer/WellKnownDidIssuer';
 import { IIssueCallbackArgs, ISignedDomainLinkageCredential, ProofFormatTypesEnum } from '../lib/types';
 
 const COMPACT_JWT_DOMAIN_LINKAGE_CREDENTIAL =
@@ -32,7 +32,7 @@ const DID_CONFIGURATION = {
   ],
 };
 
-let issuer: DomainLinkageIssuer;
+let issuer: WellKnownDidIssuer;
 
 const issueCallback = async (args: IIssueCallbackArgs): Promise<ISignedDomainLinkageCredential | string> => {
   if (args.proofFormat === ProofFormatTypesEnum.JSON_WEB_TOKEN) {
@@ -52,7 +52,7 @@ const issueCallback = async (args: IIssueCallbackArgs): Promise<ISignedDomainLin
 };
 
 beforeAll(() => {
-  issuer = new DomainLinkageIssuer({
+  issuer = new WellKnownDidIssuer({
     issueCallback: (args: IIssueCallbackArgs) => issueCallback(args),
   });
 });
@@ -256,24 +256,4 @@ describe('Domain Linkage Issuer', () => {
     await expect(issuer.issueDomainLinkageCredential(args)).rejects.toThrow('expirationDate is not a valid date');
   });
 
-  it('should use the issue callback when using the setter', async () => {
-    const COMPACT_JWT_DOMAIN_LINKAGE_CREDENTIAL = 'eyJhbG...';
-    const otherIssueCallback = async (): Promise<ISignedDomainLinkageCredential | string> =>
-      COMPACT_JWT_DOMAIN_LINKAGE_CREDENTIAL;
-    const issuer = new DomainLinkageIssuer({ issueCallback: (args: IIssueCallbackArgs) => issueCallback(args) }).setIssueCallback(
-      () => otherIssueCallback()
-    );
-
-    const args = {
-      did: DID,
-      origin: ORIGIN,
-      issuanceDate: new Date().toISOString(),
-      expirationDate: new Date(new Date().getFullYear() + 10, new Date().getMonth(), new Date().getDay()).toISOString(),
-      options: { proofFormat: ProofFormatTypesEnum.JSON_WEB_TOKEN },
-    };
-
-    const credential = await issuer.issueDomainLinkageCredential(args);
-
-    expect(credential).toEqual(COMPACT_JWT_DOMAIN_LINKAGE_CREDENTIAL);
-  });
 });

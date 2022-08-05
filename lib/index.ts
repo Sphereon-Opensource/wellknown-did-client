@@ -1,7 +1,7 @@
-import { DomainLinkageIssuer } from './issuer/DomainLinkageIssuer';
+import { WellKnownDidIssuer } from './issuer/WellKnownDidIssuer';
 import * as types from './types'
-import { DomainLinkageVerifier } from './verifier/DomainLinkageVerifier';
+import { WellKnownDidVerifier } from './verifier/WellKnownDidVerifier';
 
-export { DomainLinkageIssuer };
-export { DomainLinkageVerifier };
+export { WellKnownDidIssuer };
+export { WellKnownDidVerifier };
 export { types }

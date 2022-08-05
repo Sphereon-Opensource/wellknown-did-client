@@ -2,7 +2,7 @@ import nock from 'nock';
 
 import { CONTEXT_URLS } from '../lib/constants';
 import { IVerifyCredentialResult, ServiceTypesEnum, ValidationStatusEnum } from '../lib/types';
-import { DomainLinkageVerifier } from '../lib/verifier/DomainLinkageVerifier';
+import { WellKnownDidVerifier } from '../lib/verifier/WellKnownDidVerifier';
 
 const DID = 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM';
 const ORIGIN = 'https://example.com';
@@ -62,14 +62,14 @@ const DID_CONFIGURATION = {
   ],
 };
 
-let verifier: DomainLinkageVerifier;
+let verifier: WellKnownDidVerifier;
 
 const verifyCallback = async (): Promise<IVerifyCredentialResult> => {
   return { verified: true };
 };
 
 beforeAll(() => {
-  verifier = new DomainLinkageVerifier({
+  verifier = new WellKnownDidVerifier({
     verifySignatureCallback: () => verifyCallback(),
     onlyValidateServiceDid: false,
   });
@@ -87,7 +87,7 @@ describe('Domain Linkage Verifier', () => {
   it('should only verify service DIDs when onlyValidateServiceDid is true', async () => {
     nock(ORIGIN).get('/.well-known/did-configuration.json').times(3).reply(200, DID_CONFIGURATION);
 
-    const result = await verifier.setOnlyValidateServiceDid(true).verifyDomainLinkage({ didDocument: DOCUMENT });
+    const result = await verifier.verifyDomainLinkage({ didDocument: DOCUMENT, onlyValidateServiceDid: true });
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -354,7 +354,7 @@ describe('Domain Linkage Verifier', () => {
         return { verified: false };
       };
 
-      const verifier = new DomainLinkageVerifier({
+      const verifier = new WellKnownDidVerifier({
         verifySignatureCallback: () => verifyCallback(),
         onlyValidateServiceDid: false,
       });

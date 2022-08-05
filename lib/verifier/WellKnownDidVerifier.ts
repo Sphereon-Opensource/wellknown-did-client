@@ -1,4 +1,5 @@
 import { IParsedDID, parseDid } from '@sphereon/ssi-sdk-core';
+import { Service } from 'did-resolver/lib/resolver';
 
 import {
   ICredentialValidation,
@@ -23,38 +24,13 @@ import {
   ValidationStatusEnum,
 } from '../types';
 import { decodeToken, fetchWellKnownDidConfiguration } from '../utils';
-import { Service } from 'did-resolver/src/resolver';
 
-export class DomainLinkageVerifier {
+export class WellKnownDidVerifier {
   private readonly config: IVerifierConfig;
 
   /** Verifier constructor */
   constructor(config: IVerifierConfig) {
     this.config = config
-  }
-
-  /**
-   * Sets the verify signature callback for the verifier.
-   *
-   * @param callback The verify signature callback for the verifier.
-   * @return this.
-   */
-  public setVerifySignatureCallback(callback: () => Promise<IVerifyCredentialResult>): this {
-    this.config.verifySignatureCallback = callback
-
-    return this;
-  }
-
-  /**
-   * Sets the onlyValidateServiceDid for the verifier.
-   *
-   * @param onlyValidateServiceDid The option to only verify certain DIDs.
-   * @return this.
-   */
-  public setOnlyValidateServiceDid(onlyValidateServiceDid: boolean): this {
-    this.config.onlyValidateServiceDid = onlyValidateServiceDid
-
-    return this;
   }
 
   /**
@@ -71,7 +47,11 @@ export class DomainLinkageVerifier {
     const linkedDomainsEndpointDescriptors: Array<Service> = args.didDocument.service.filter((service: Service) => service.type = ServiceTypesEnum.LINKED_DOMAINS)
     if (linkedDomainsEndpointDescriptors.length === 0) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: `Property service does not contain any services with type: ${ServiceTypesEnum.LINKED_DOMAINS}` })
 
-    const descriptorValidations = linkedDomainsEndpointDescriptors.map((descriptor: Service) => this.verifyEndpointDescriptor({ descriptor }))
+    const descriptorValidations = linkedDomainsEndpointDescriptors.map((descriptor: Service) => this.verifyEndpointDescriptor({
+      descriptor,
+      verifySignatureCallback: args.verifySignatureCallback,
+      onlyValidateServiceDid: args.onlyValidateServiceDid
+    }))
 
     return await Promise.allSettled(descriptorValidations)
       .then((results: Array<PromiseSettledResult<IDescriptorValidation>>) => {
@@ -95,7 +75,7 @@ export class DomainLinkageVerifier {
       const resourceValidations = this.getOrigins(args.descriptor)
         .map((origin: string) => fetchWellKnownDidConfiguration(origin)
           .catch((error: Error) => Promise.reject({ status: ValidationStatusEnum.INVALID, message: error.message}))
-          .then((didConfigurationResource: IDidConfigurationResource) => this.verifyResource({ configuration: didConfigurationResource, did: (this.config.onlyValidateServiceDid) ? args.descriptor.id : undefined }))
+          .then((didConfigurationResource: IDidConfigurationResource) => this.verifyResource({ configuration: didConfigurationResource, did: (this.config.onlyValidateServiceDid || args.onlyValidateServiceDid) ? args.descriptor.id : undefined, verifySignatureCallback: args.verifySignatureCallback }))
       )
 
       return await Promise.allSettled(resourceValidations)
@@ -138,7 +118,7 @@ export class DomainLinkageVerifier {
       if (new URL(args.origin).protocol !== 'https:') return Promise.reject('origin is not secure')
     }
 
-    let didConfigurationResource: IDidConfigurationResource = (args.configuration)
+    const didConfigurationResource: IDidConfigurationResource = (args.configuration)
         ? args.configuration
         : await fetchWellKnownDidConfiguration(args.origin!)
 
@@ -160,7 +140,7 @@ export class DomainLinkageVerifier {
 
             return credential.credentialSubject.id === parsedDID.did
           })
-          .map((credential: ISignedDomainLinkageCredential | string) => this.verifyDomainLinkageCredential({ credential }))
+          .map((credential: ISignedDomainLinkageCredential | string) => this.verifyDomainLinkageCredential({ credential, verifySignatureCallback: args.verifySignatureCallback }))
 
         if (credentialValidations.length === 0) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: `No credentials found for DID: ${args.did}`})
 
@@ -186,7 +166,9 @@ export class DomainLinkageVerifier {
     if (typeof args.credential === 'string') {
       return this.verifyJsonWebTokenProofFormat(args.credential)
         .then(() => this.verifyDomainLinkageCredentialStructure((decodeToken(args.credential as string, false) as IJsonWebTokenProofPayload).vc))
-        .then(() => this.config.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_LD }))
+        .then(() => (args.verifySignatureCallback)
+            ? args.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_LD })
+            : this.config.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_LD }))
         .then((verificationResult: IVerifyCredentialResult) => {
           if (!verificationResult.verified) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Signature is invalid'})
 
@@ -243,8 +225,6 @@ export class DomainLinkageVerifier {
       // The object serviceEndpoint property can be an object which MUST contain an origins property
       if (!descriptor.serviceEndpoint.hasOwnProperty('origins'))
         return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property serviceEndpoint does not contain an origins field' })
-
-
 
       // The object serviceEndpoint property should have origins
       if ((descriptor.serviceEndpoint as IServiceEndpoint).origins.length === 0)

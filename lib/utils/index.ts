@@ -8,6 +8,7 @@ import { IDidConfigurationResource } from '../types';
  * Fetches a DID configuration resource from a given origin.
  *
  * @param origin The origin of the location.
+ * @param verifyResource
  * @return {IDidConfigurationResource}, DID configuration resource.
  */
 export const fetchWellKnownDidConfiguration = async (origin: string): Promise<IDidConfigurationResource> => {
@@ -20,7 +21,7 @@ export const fetchWellKnownDidConfiguration = async (origin: string): Promise<ID
       }
       return response.json();
     })
-    .catch(() => {
+  .catch(() => {
       return Promise.reject(Error(`Unable to retrieve did configuration resource from ${url}`))
     });
 }
