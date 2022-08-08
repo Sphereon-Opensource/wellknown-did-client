@@ -58,7 +58,7 @@ export class WellKnownDidVerifier {
     const descriptorValidations = linkedDomainsEndpointDescriptors.map((descriptor: Service) => this.verifyEndpointDescriptor({
       descriptor,
       verifySignatureCallback: args.verifySignatureCallback,
-      onlyValidateServiceDid: args.onlyValidateServiceDid
+      onlyVerifyServiceDid: args.onlyVerifyServiceDid
     }))
 
     return await Promise.allSettled(descriptorValidations)
@@ -89,7 +89,7 @@ export class WellKnownDidVerifier {
           .then((didConfigurationResource: IDidConfigurationResource) =>
               this.verifyResource({
                 configuration: didConfigurationResource,
-                did: (this.config!.onlyValidateServiceDid || args.onlyValidateServiceDid)
+                did: (this.config!.onlyVerifyServiceDid || args.onlyVerifyServiceDid)
                     ? args.descriptor.id
                     : undefined, verifySignatureCallback: args.verifySignatureCallback
               }))

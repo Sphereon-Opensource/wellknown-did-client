@@ -78,7 +78,7 @@ export interface IDidConfigurationResource {
 export interface IVerifierConfig {
   verifySignatureCallback: (args: IVerifyCallbackArgs) => Promise<IVerifyCredentialResult>
   // Option to only verify dids mentioned in the service endpoint descriptor
-  onlyValidateServiceDid?: boolean
+  onlyVerifyServiceDid?: boolean
 }
 
 export interface IServiceEndpoint {
@@ -111,14 +111,14 @@ export interface IVerifyDomainLinkageArgs {
   didDocument: DIDDocument
   verifySignatureCallback?: (args: IVerifyCallbackArgs) => Promise<IVerifyCredentialResult>
   // Option to only verify dids mentioned in the service endpoint descriptor
-  onlyValidateServiceDid?: boolean
+  onlyVerifyServiceDid?: boolean
 }
 
 export interface IVerifyEndpointDescriptorArgs {
   descriptor: Service
   verifySignatureCallback?: (args: IVerifyCallbackArgs) => Promise<IVerifyCredentialResult>
   // Option to only verify dids mentioned in the service endpoint descriptor
-  onlyValidateServiceDid?: boolean
+  onlyVerifyServiceDid?: boolean
 }
 
 export interface IVerifyResourceArgs {

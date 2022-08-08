@@ -78,7 +78,7 @@ const verifyCallback = async (): Promise<IVerifyCredentialResult> => {
 beforeAll(() => {
   verifier = new WellKnownDidVerifier({
     verifySignatureCallback: () => verifyCallback(),
-    onlyValidateServiceDid: false,
+    onlyVerifyServiceDid: false,
   });
 });
 
@@ -91,10 +91,10 @@ describe('Domain Linkage Verifier', () => {
     expect(result.status).toEqual(ValidationStatusEnum.VALID);
   });
 
-  it('should only verify service DIDs when onlyValidateServiceDid is true', async () => {
+  it('should only verify service DIDs when onlyVerifyServiceDid is true', async () => {
     nock(ORIGIN).get('/.well-known/did-configuration.json').times(3).reply(200, DID_CONFIGURATION);
 
-    const result = await verifier.verifyDomainLinkage({ didDocument: DOCUMENT, onlyValidateServiceDid: true });
+    const result = await verifier.verifyDomainLinkage({ didDocument: DOCUMENT, onlyVerifyServiceDid: true });
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -366,7 +366,7 @@ describe('Domain Linkage Verifier', () => {
 
       const verifier = new WellKnownDidVerifier({
         verifySignatureCallback: () => verifyCallback(),
-        onlyValidateServiceDid: false,
+        onlyVerifyServiceDid: false,
       });
 
       await expect(
