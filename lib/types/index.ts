@@ -8,13 +8,13 @@ export interface IIssuerConfig {
 }
 
 export interface IDomainLinkageCredential {
-  '@context'?: string[]
+  '@context': string[]
   issuer: string
   subject?: string
   credentialSubject: ICredentialSubject
   type?: string[]
-  issuanceDate: string | Date
-  expirationDate: string | Date
+  issuanceDate: string
+  expirationDate: string
 }
 
 export interface CredentialProof {
@@ -50,8 +50,8 @@ export interface IIssueDidConfigurationResourceArgs {
 export interface IIssueDomainLinkageCredentialArgs {
   did: string
   origin: string
-  issuanceDate?: Date | string
-  expirationDate: Date | string
+  issuanceDate?: string
+  expirationDate: string
   options: IIssueDomainLinkageCredentialOptions
   issueCallback?: (args: IIssueCallbackArgs) => Promise<ISignedDomainLinkageCredential | string>
 }

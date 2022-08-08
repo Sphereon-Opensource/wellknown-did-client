@@ -219,8 +219,11 @@ describe('Domain Linkage Verifier', () => {
     });
 
     it('should be able to verify a did configuration resource from a well-known location', async () => {
-      const result = await verifier.verifyResource({ origin: 'https://identity.foundation' });
-      console.log(result); // TODO fix
+      nock(ORIGIN).get('/.well-known/did-configuration.json').times(1).reply(200, DID_CONFIGURATION);
+
+      const result = await verifier.verifyResource({ origin: ORIGIN });
+
+      expect(result.status).toEqual(ValidationStatusEnum.VALID);
     });
   });
 
