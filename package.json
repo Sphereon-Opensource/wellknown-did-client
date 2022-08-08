@@ -1,7 +1,7 @@
 {
   "name": "@sphereon/wellknown-dids-client",
   "version": "0.1.0",
-  "description": "",
+  "description": "Well-known DID client allows to create and verify DID Domain configuration resources",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "license": "Apache-2.0",
