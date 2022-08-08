@@ -10,7 +10,6 @@ export interface IIssuerConfig {
 export interface IDomainLinkageCredential {
   '@context': string[]
   issuer: string
-  subject?: string
   credentialSubject: ICredentialSubject
   type?: string[]
   issuanceDate: string

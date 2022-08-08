@@ -360,10 +360,6 @@ export class WellKnownDidVerifier {
     if (credential.issuer && credential.credentialSubject.id !== credential.issuer)
       return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property credentialSubject.id does not match issuer property' })
 
-    // The credentialSubject.id value MUST be equal to the subject of the Domain Linkage Credential.
-    if (credential.subject && credential.credentialSubject.id !== credential.subject)
-      return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property credentialSubject.id does not match subject property' })
-
     // Property credentialSubject.origin MUST be present.
     if (!credential.credentialSubject.origin)
       return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property credentialSubject.origin is not present within the credential'})

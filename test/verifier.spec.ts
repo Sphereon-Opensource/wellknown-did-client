@@ -272,13 +272,6 @@ describe('Domain Linkage Verifier', () => {
       });
     });
 
-    it('should reject if credentialSubject.id does not match present subject value', async () => {
-      await expect(verifier.verifyDomainLinkageCredential({ credential: { ...CREDENTIAL, subject: 'did:key:other' } })).rejects.toEqual({
-        status: ValidationStatusEnum.INVALID,
-        message: 'Property credentialSubject.id does not match subject property',
-      });
-    });
-
     it('should reject if credentialSubject.origin is not valid domain value', async () => {
       await expect(
         verifier.verifyDomainLinkageCredential({
