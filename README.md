@@ -125,7 +125,7 @@ const didDoccument = {
   ...
 };
 
-verifier.verifyDomainLinkage({ didDoccument, onlyValidateServiceDid: false })
+verifier.verifyDomainLinkage({ didDoccument, onlyVerifyServiceDid: false })
   .then(result => 'success')
   .catch(error => 'failed');
  ```

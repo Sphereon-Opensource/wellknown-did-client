@@ -73,7 +73,7 @@ const verifyCallback = async (): Promise<IVerifyCredentialResult> => {
 beforeAll(() => {
   verifier = new WellKnownDidVerifier({
     verifySignatureCallback: () => verifyCallback(),
-    onlyValidateServiceDid: false,
+    onlyVerifyServiceDid: false,
   });
 });
 
@@ -86,10 +86,10 @@ describe('Domain Linkage Verifier', () => {
     expect(result.status).toEqual(ValidationStatusEnum.VALID);
   });
 
-  it('should only verify service DIDs when onlyValidateServiceDid is true', async () => {
+  it('should only verify service DIDs when onlyVerifyServiceDid is true', async () => {
     nock(ORIGIN).get('/.well-known/did-configuration.json').times(3).reply(200, DID_CONFIGURATION);
 
-    const result = await verifier.verifyDomainLinkage({ didDocument: DOCUMENT, onlyValidateServiceDid: true });
+    const result = await verifier.verifyDomainLinkage({ didDocument: DOCUMENT, onlyVerifyServiceDid: true });
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -214,8 +214,11 @@ describe('Domain Linkage Verifier', () => {
     });
 
     it('should be able to verify a did configuration resource from a well-known location', async () => {
-      const result = await verifier.verifyResource({ origin: 'https://identity.foundation' });
-      console.log(result); // TODO fix
+      nock(ORIGIN).get('/.well-known/did-configuration.json').times(1).reply(200, DID_CONFIGURATION);
+
+      const result = await verifier.verifyResource({ origin: ORIGIN });
+
+      expect(result.status).toEqual(ValidationStatusEnum.VALID);
     });
   });
 
@@ -261,13 +264,6 @@ describe('Domain Linkage Verifier', () => {
       await expect(verifier.verifyDomainLinkageCredential({ credential: { ...CREDENTIAL, issuer: 'did:key:other' } })).rejects.toEqual({
         status: ValidationStatusEnum.INVALID,
         message: 'Property credentialSubject.id does not match issuer property',
-      });
-    });
-
-    it('should reject if credentialSubject.id does not match present subject value', async () => {
-      await expect(verifier.verifyDomainLinkageCredential({ credential: { ...CREDENTIAL, subject: 'did:key:other' } })).rejects.toEqual({
-        status: ValidationStatusEnum.INVALID,
-        message: 'Property credentialSubject.id does not match subject property',
       });
     });
 
@@ -358,7 +354,7 @@ describe('Domain Linkage Verifier', () => {
 
       const verifier = new WellKnownDidVerifier({
         verifySignatureCallback: () => verifyCallback(),
-        onlyValidateServiceDid: false,
+        onlyVerifyServiceDid: false,
       });
 
       await expect(

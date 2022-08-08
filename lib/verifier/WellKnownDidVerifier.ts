@@ -58,7 +58,7 @@ export class WellKnownDidVerifier {
     const descriptorValidations = linkedDomainsEndpointDescriptors.map((descriptor: Service) => this.verifyEndpointDescriptor({
       descriptor,
       verifySignatureCallback: args.verifySignatureCallback,
-      onlyValidateServiceDid: args.onlyValidateServiceDid
+      onlyVerifyServiceDid: args.onlyVerifyServiceDid
     }))
 
     return await Promise.allSettled(descriptorValidations)
@@ -89,7 +89,7 @@ export class WellKnownDidVerifier {
           .then((didConfigurationResource: IDidConfigurationResource) =>
               this.verifyResource({
                 configuration: didConfigurationResource,
-                did: (this.config!.onlyValidateServiceDid || args.onlyValidateServiceDid)
+                did: (this.config!.onlyVerifyServiceDid || args.onlyVerifyServiceDid)
                     ? args.descriptor.id
                     : undefined, verifySignatureCallback: args.verifySignatureCallback
               }))
@@ -359,10 +359,6 @@ export class WellKnownDidVerifier {
     // The credentialSubject.id value MUST be equal to the issuer of the Domain Linkage Credential.
     if (credential.issuer && credential.credentialSubject.id !== credential.issuer)
       return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property credentialSubject.id does not match issuer property' })
-
-    // The credentialSubject.id value MUST be equal to the subject of the Domain Linkage Credential.
-    if (credential.subject && credential.credentialSubject.id !== credential.subject)
-      return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property credentialSubject.id does not match subject property' })
 
     // Property credentialSubject.origin MUST be present.
     if (!credential.credentialSubject.origin)

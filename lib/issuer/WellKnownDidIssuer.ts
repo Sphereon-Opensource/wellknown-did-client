@@ -72,11 +72,11 @@ export class WellKnownDidIssuer {
       return Promise.reject(Error('origin is not a valid origin'))
     }
 
-    if (args.issuanceDate && typeof args.issuanceDate === 'string' && isNaN(Date.parse(args.issuanceDate))) {
+    if (args.issuanceDate && isNaN(Date.parse(args.issuanceDate))) {
       return Promise.reject(Error('issuanceDate is not a valid date'))
     }
 
-    if (typeof args.expirationDate === 'string' && isNaN(Date.parse(args.expirationDate))) {
+    if (isNaN(Date.parse(args.expirationDate))) {
       return Promise.reject(Error('expirationDate is not a valid date'))
     }
 

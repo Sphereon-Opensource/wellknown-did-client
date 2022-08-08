@@ -1403,12 +1403,13 @@
     nanoid "^3.3.4"
     string.prototype.matchall "^4.0.7"
 
-"@sphereon/ssi-sdk-core@^0.6.1-next.78":
-  version "0.6.1-unstable.92"
-  resolved "https://registry.yarnpkg.com/@sphereon/ssi-sdk-core/-/ssi-sdk-core-0.6.1-unstable.92.tgz#8c88d962ff952cb8ecafcd7da59cdccf4a8bcf27"
-  integrity sha512-Xro/SANQ5WCr22ANJBXOh9SUleQqH00fkwXCkyfFYYeTHGAV3TzNl8CtdcD0E33QDN3zF2mQC2akj9p0pjyNXw==
+"@sphereon/ssi-sdk-core@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@sphereon/ssi-sdk-core/-/ssi-sdk-core-0.7.0.tgz#6ab10610a6afcbcf801f9fa25201ca84b74bd06f"
+  integrity sha512-H3iN+mnU9eP8ztQGUX8V8hbAAgtiSVj2eJqFOddFp/xNYW0K2jBiuuJWV7QvIGata7zwVXt93UEa+XqRmum1kw==
   dependencies:
     "@scure/base" "^1.0.0-rc1"
+    "@sphereon/did-auth-siop" "^0.2.12"
     "@sphereon/did-uni-client" "^0.4.0"
     "@veramo/core" "3.1.2-next.84"
     "@veramo/did-manager" "3.1.2-next.84"
@@ -2524,7 +2525,25 @@ did-jwt@^5.7.0:
     multiformats "^9.4.10"
     uint8arrays "^3.0.0"
 
-did-jwt@^6.2.0, did-jwt@^6.2.2:
+did-jwt@^6.2.0:
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/did-jwt/-/did-jwt-6.3.0.tgz#6c7380a69fff97f95101ce03519fd34c0ee43594"
+  integrity sha512-kvwCDY6KZJZn9/LK+X4Co+X1brnZWr6fnP1NRVReTgSPFyA+20oZ+VCsmSnzzYUoPkQ/Pl54uOMlmRw69z5zBg==
+  dependencies:
+    "@stablelib/ed25519" "^1.0.2"
+    "@stablelib/random" "^1.0.1"
+    "@stablelib/sha256" "^1.0.1"
+    "@stablelib/x25519" "^1.0.2"
+    "@stablelib/xchacha20poly1305" "^1.0.1"
+    bech32 "^2.0.0"
+    canonicalize "^1.0.8"
+    did-resolver "^4.0.0"
+    elliptic "^6.5.4"
+    js-sha3 "^0.8.0"
+    multiformats "^9.6.5"
+    uint8arrays "^3.0.0"
+
+did-jwt@^6.2.2:
   version "6.2.2"
   resolved "https://registry.yarnpkg.com/did-jwt/-/did-jwt-6.2.2.tgz#6a3e84bb0d75dee510ba2481f31b9c1530a41cc8"
   integrity sha512-/OJBpNkNIUGZW5L5GzuSivpB+RvRhOdRKMQ9a3KAzyTNI85RUoxelqYDwmUOA6i+MKVeJQaONf4beT03ACgQ/w==
