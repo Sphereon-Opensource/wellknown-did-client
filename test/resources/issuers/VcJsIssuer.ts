@@ -5,10 +5,7 @@ import { Ed25519Signature2020 } from '@digitalcredentials/ed25519-signature-2020
 // @ts-ignore
 import { Ed25519VerificationKey2020 } from '@digitalcredentials/ed25519-verification-key-2020';
 
-import {
-  IIssueCallbackArgs,
-  ISignedDomainLinkageCredential
-} from '../../../lib/types';
+import { IIssueCallbackArgs, ISignedDomainLinkageCredential } from '../../../lib/types';
 import { DocumentLoader } from '../DocumentLoader';
 
 const vc = require('@digitalcredentials/vc');

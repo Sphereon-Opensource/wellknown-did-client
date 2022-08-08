@@ -132,7 +132,7 @@ export interface IVerifyDomainLinkageCredentialArgs {
   verifySignatureCallback?: (args: IVerifyCallbackArgs) => Promise<IVerifyCredentialResult>
 }
 
-export type StrictPropertyCheck<T, TExpected, TError> = Exclude<keyof T, keyof TExpected> extends never ? {} : TError;
+export type StrictPropertyCheck<T, TExpected, TError> = Exclude<keyof T, keyof TExpected> extends never ? unknown : TError;
 
 export interface ICredentialValidation {
   status: ValidationStatusEnum;

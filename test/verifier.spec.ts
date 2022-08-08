@@ -1,12 +1,7 @@
 import nock from 'nock';
 
 import { CONTEXT_URLS } from '../lib/constants';
-import {
-  IVerifyCallbackArgs,
-  IVerifyCredentialResult,
-  ServiceTypesEnum,
-  ValidationStatusEnum
-} from '../lib/types';
+import { IVerifyCallbackArgs, IVerifyCredentialResult, ServiceTypesEnum, ValidationStatusEnum } from '../lib/types';
 import { WellKnownDidVerifier } from '../lib/verifier/WellKnownDidVerifier';
 
 import { VcJsVerifier } from './resources/verifiers/VcJsVerifier';
@@ -380,34 +375,29 @@ describe('Domain Linkage Verifier', () => {
       });
 
       const signedCredential = {
-        '@context': [
-          'https://www.w3.org/2018/credentials/v1',
-          'https://identity.foundation/.well-known/did-configuration/v1'
-        ],
-        'issuer': 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
-        'issuanceDate': '2020-12-04T14:08:28-06:00',
-        'expirationDate': '2025-12-04T14:08:28-06:00',
-        'type': [
-          'VerifiableCredential',
-          'DomainLinkageCredential'
-        ],
-        'credentialSubject': {
-          'id': 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
-          'origin': 'https://identity.foundation'
+        '@context': ['https://www.w3.org/2018/credentials/v1', 'https://identity.foundation/.well-known/did-configuration/v1'],
+        issuer: 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
+        issuanceDate: '2020-12-04T14:08:28-06:00',
+        expirationDate: '2025-12-04T14:08:28-06:00',
+        type: ['VerifiableCredential', 'DomainLinkageCredential'],
+        credentialSubject: {
+          id: 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
+          origin: 'https://identity.foundation',
         },
-        'proof': {
-          'type': 'Ed25519Signature2018',
-          'created': '2020-12-04T20:08:28.540Z',
-          'jws': 'eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..D0eDhglCMEjxDV9f_SNxsuU-r3ZB9GR4vaM9TYbyV7yzs1WfdUyYO8rFZdedHbwQafYy8YOpJ1iJlkSmB4JaDQ',
-          'proofPurpose': 'assertionMethod',
-          'verificationMethod': 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM#z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM'
-        }
-      }
+        proof: {
+          type: 'Ed25519Signature2018',
+          created: '2020-12-04T20:08:28.540Z',
+          jws: 'eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..D0eDhglCMEjxDV9f_SNxsuU-r3ZB9GR4vaM9TYbyV7yzs1WfdUyYO8rFZdedHbwQafYy8YOpJ1iJlkSmB4JaDQ',
+          proofPurpose: 'assertionMethod',
+          verificationMethod: 'did:key:z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM#z6MkoTHsgNNrby8JzCNQ1iRLyW5QQ6R8Xuu6AA8igGrMVPUM',
+        },
+      };
 
       // Will throw signature is invalid as this is just a test to check the integration
-      await expect(
-          verifier.verifyDomainLinkageCredential({ credential: signedCredential })
-      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'Signature is invalid' });
+      await expect(verifier.verifyDomainLinkageCredential({ credential: signedCredential })).rejects.toEqual({
+        status: ValidationStatusEnum.INVALID,
+        message: 'Signature is invalid',
+      });
     });
   });
 });

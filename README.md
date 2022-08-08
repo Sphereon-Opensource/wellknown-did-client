@@ -5,10 +5,10 @@
   <br>
 </h1>
 
-[![CI](https://github.com/Sphereon-Opensource/wellknown-dids-client/actions/workflows/main.yml/badge.svg)](https://github.com/Sphereon-Opensource/wellknown-dids-client/actions/workflows/main.yml)  [![codecov](https://codecov.io/gh/Sphereon-Opensource/wellknown-dids-client/branch/develop/graph/badge.svg?token=9P1JGUYA35)](https://codecov.io/gh/Sphereon-Opensource/wellknown-dids-client) [![NPM Version](https://img.shields.io/npm/v/@sphereon/wellknown-dids-client.svg)](https://npm.im/@sphereon/wellknown-dids-client)
+[![CI](https://github.com/Sphereon-Opensource/wellknown-dids-client/actions/workflows/main.yaml/badge.svg)](https://github.com/Sphereon-Opensource/wellknown-dids-client/actions/workflows/main.yaml)  [![codecov](https://codecov.io/gh/Sphereon-Opensource/wellknown-dids-client/branch/develop/graph/badge.svg?token=9P1JGUYA35)](https://codecov.io/gh/Sphereon-Opensource/wellknown-dids-client) [![NPM Version](https://img.shields.io/npm/v/@sphereon/wellknown-dids-client.svg)](https://npm.im/@sphereon/wellknown-dids-client)
 
 ### Wellknown-dids client
-The wellknown-dids-client is a library to create DID configuration resources and domain linkage credentials and to be able to verify these. 
+The wellknown-dids-client is a library to create DID configuration resources and domain linkage credentials and to be able to verify these conforming to the DIF [spec for well-known DID Configurations](https://identity.foundation/.well-known/resources/did-configuration/) 
 It is written in Typescript and can be compiled to any target JavaScript version.
 
 ### Supported actions
