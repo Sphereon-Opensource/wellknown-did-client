@@ -24,10 +24,10 @@ jobs:
       - name: yarn build
         run: yarn build
       - name: codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-          name: codecove # optional
+          name: codecov # optional
           flags: unittest
           fail_ci_if_error: true # optional (default = false)
           #directory: ./coverage/reports/
