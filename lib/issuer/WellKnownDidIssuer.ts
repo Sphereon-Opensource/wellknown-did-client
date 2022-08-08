@@ -100,6 +100,8 @@ export class WellKnownDidIssuer {
 
     return (args.issueCallback)
         ? await args.issueCallback({ credential, proofFormat: args.options.proofFormat })
+        // @ts-ignore: We know for sure the config is present
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         : await this.config!.issueCallback({ credential, proofFormat: args.options.proofFormat })
   }
 

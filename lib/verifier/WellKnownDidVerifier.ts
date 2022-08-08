@@ -89,7 +89,7 @@ export class WellKnownDidVerifier {
           .then((didConfigurationResource: IDidConfigurationResource) =>
               this.verifyResource({
                 configuration: didConfigurationResource,
-                did: (this.config!.onlyVerifyServiceDid || args.onlyVerifyServiceDid)
+                did: (this.config?.onlyVerifyServiceDid || args.onlyVerifyServiceDid)
                     ? args.descriptor.id
                     : undefined, verifySignatureCallback: args.verifySignatureCallback
               }))
@@ -135,8 +135,12 @@ export class WellKnownDidVerifier {
       if (new URL(args.origin).protocol !== 'https:') return Promise.reject('origin is not secure')
     }
 
-    const didConfigurationResource: IDidConfigurationResource = (args.configuration)
+    const didConfigurationResource: IDidConfigurationResource = args.configuration
+        // @ts-ignore: We know for sure the config is present
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         ? await verifyResourceStructure(args.configuration).then(() => args.configuration!)
+        // @ts-ignore: We know for sure the origin is present
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         : await fetchWellKnownDidConfiguration(args.origin!)
 
 
@@ -174,7 +178,7 @@ export class WellKnownDidVerifier {
   /**
    * Verifies the domain linkage credential.
    *
-   * @param credential The domain linkage credential. Types can be JWT or JSONLD.
+   * @param args The domain linkage credential. Types can be JWT or JSONLD.
    * @return {ICredentialValidation}, The validation result.
    */
   public async verifyDomainLinkageCredential(args: IVerifyDomainLinkageCredentialArgs): Promise<ICredentialValidation> {
@@ -185,8 +189,10 @@ export class WellKnownDidVerifier {
     if (typeof args.credential === 'string') {
       return this.verifyJsonWebTokenProofFormat(args.credential)
         .then(() => this.verifyDomainLinkageCredentialStructure((decodeToken(args.credential as string, false) as IJsonWebTokenProofPayload).vc))
-        .then(() => (args.verifySignatureCallback)
+        .then(() => args.verifySignatureCallback
             ? args.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_WEB_TOKEN })
+            // @ts-ignore: We know for sure the config is present
+            // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
             : this.config!.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_WEB_TOKEN }))
         .then((verificationResult: IVerifyCredentialResult) => {
           if (!verificationResult.verified) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Signature is invalid'})
@@ -196,8 +202,10 @@ export class WellKnownDidVerifier {
     }
 
     return this.verifyDomainLinkageCredentialStructure(args.credential as ISignedDomainLinkageCredential)
-      .then(() => (args.verifySignatureCallback)
+      .then(() => args.verifySignatureCallback
           ? args.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_LD })
+          // @ts-ignore: We know for sure the config is present
+          // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
           : this.config!.verifySignatureCallback({ credential: args.credential, proofFormat: ProofFormatTypesEnum.JSON_LD }))
       .then((verificationResult: IVerifyCredentialResult) => {
         if (!verificationResult.verified) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Signature is invalid'})
@@ -331,14 +339,14 @@ export class WellKnownDidVerifier {
     if (!credential.issuanceDate) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property issuanceDate is not present within the credential' })
 
     // Property issuanceDate MUST be a valid date.
-    if (typeof credential.issuanceDate === 'string' && isNaN(Date.parse(credential.issuanceDate)))
+    if (/*typeof credential.issuanceDate === 'string' && */isNaN(Date.parse(credential.issuanceDate)))
       return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property issuanceDate is not a valid date' })
 
     // Property expirationDate MUST be present.
     if (!credential.expirationDate) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property expirationDate is not present within the credential' })
 
     // Property expirationDate MUST be a valid date.
-    if (typeof credential.expirationDate === 'string' && isNaN(Date.parse(credential.expirationDate)))
+    if (/*typeof credential.expirationDate === 'string' && */isNaN(Date.parse(credential.expirationDate)))
       return Promise.reject({ status: ValidationStatusEnum.INVALID, message: 'Property expirationDate is not a valid date' })
 
     // Property credentialSubject MUST be present.

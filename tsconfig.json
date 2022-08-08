@@ -1,10 +1,9 @@
 {
   "compilerOptions": {
+    "module": "commonjs",
     "target": "es6",
     "declaration": true,
     "outDir": "./dist",
-    "moduleResolution": "node",
-    "module": "commonjs",
     "inlineSourceMap": true,
     "esModuleInterop": true
     /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
@@ -29,7 +28,11 @@
     /* Print names of files part of the compilation. */,
     "pretty": true,
 
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "lib": [
+      "es6",
+      "es2020.promise"
+    ]
   },
 
   "include": [
