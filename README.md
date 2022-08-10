@@ -1,7 +1,7 @@
 <h1 align="center">
   <br>
   <a href="https://www.sphereon.com"><img src="https://sphereon.com/content/themes/sphereon/assets/img/logo.svg" alt="Sphereon" width="400"></a>
-  <br>Wellknown-dids client
+  <br>Well Known DID client
   <br>
 </h1>
 
