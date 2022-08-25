@@ -2,12 +2,12 @@ import { parseDid } from '@sphereon/ssi-sdk-core';
 
 import { CONTEXT_URLS } from '../constants';
 import {
+  DomainLinkageCredential,
   IDidConfigurationResource,
   IDomainLinkageCredential,
   IIssueDidConfigurationResourceArgs,
   IIssueDomainLinkageCredentialArgs,
-  IIssuerConfig,
-  ISignedDomainLinkageCredential,
+  IIssuerConfig
 } from '../types';
 import { fetchWellKnownDidConfiguration } from '../utils';
 
@@ -30,8 +30,12 @@ export class WellKnownDidIssuer {
       return Promise.reject(Error('Cannot supply both a configuration and an origin. Only one should be supplied at the same time.'))
     }
 
-    if (!args.issueCallback && (!this.config || !this.config?.issueCallback)) {
+    if (!args.issueCallback && (!this.config || !this.config?.issueCallback) && args.issuances.some(issuance => !issuance.issueCallback)) {
       return Promise.reject(Error('issueCallback needs to be supplied via parameter or config'))
+    }
+
+    if (args.origin && args.issuances.filter(issuance => issuance.origin !== args.origin).length > 0) {
+      return Promise.reject(Error('One or more issuances have an origin that does not match the provided origin'))
     }
 
     let didConfigurationResource: IDidConfigurationResource;
@@ -42,12 +46,15 @@ export class WellKnownDidIssuer {
     } else {
       didConfigurationResource = {
         '@context': CONTEXT_URLS.IDENTITY_FOUNDATION_WELL_KNOWN_DID,
-        'linked_dids': new Array<ISignedDomainLinkageCredential | string>()
+        'linked_dids': new Array<DomainLinkageCredential>()
       }
     }
 
-    const credentials: Array<ISignedDomainLinkageCredential | string> = await Promise.all(args.issuances.map((issuance: IIssueDomainLinkageCredentialArgs) =>
-        this.issueDomainLinkageCredential(issuance))
+    const credentials: Array<DomainLinkageCredential> = await Promise.all(
+        args.issuances.map((item: IIssueDomainLinkageCredentialArgs) => {
+          const issuance = (!item.issueCallback ? { ...item, issueCallback: args.issueCallback } : item )
+          return this.issueDomainLinkageCredential(issuance)
+        })
     )
     didConfigurationResource.linked_dids = didConfigurationResource.linked_dids.concat(credentials)
 
@@ -59,9 +66,9 @@ export class WellKnownDidIssuer {
    * Return types can be of Linked Data Proof Format or JSON Web Token Proof Format.
    *
    * @param args The arguments for issuance.
-   * @return {ILinkedDataDomainLinkageCredential | string}, issuance result.
+   * @return {DomainLinkageCredential}, issuance result.
    */
-  public async issueDomainLinkageCredential(args: IIssueDomainLinkageCredentialArgs): Promise<ISignedDomainLinkageCredential | string> {
+  public async issueDomainLinkageCredential(args: IIssueDomainLinkageCredentialArgs): Promise<DomainLinkageCredential> {
     if (!args.issueCallback && (!this.config || !this.config?.issueCallback)) {
       return Promise.reject(Error('issueCallback needs to be supplied via parameter or config'))
     }

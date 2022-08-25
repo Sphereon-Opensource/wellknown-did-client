@@ -2,6 +2,7 @@ import { parseDid } from '@sphereon/ssi-sdk-core';
 import { Service } from 'did-resolver/lib/resolver';
 
 import {
+  DomainLinkageCredential,
   ICredentialValidation,
   IDescriptorValidation,
   IDidConfigurationResource,
@@ -145,7 +146,7 @@ export class WellKnownDidVerifier {
 
 
     const credentialValidations = didConfigurationResource.linked_dids
-      .filter((item: ISignedDomainLinkageCredential | string) => {
+      .filter((item: DomainLinkageCredential) => {
         if (!did) return true
         let credential: ISignedDomainLinkageCredential | Omit<ISignedDomainLinkageCredential, 'proof'>
         if (typeof item === 'string') {
@@ -160,7 +161,7 @@ export class WellKnownDidVerifier {
 
         return credential.credentialSubject.id === did
       })
-      .map((credential: ISignedDomainLinkageCredential | string) => this.verifyDomainLinkageCredential({ credential, verifySignatureCallback: args.verifySignatureCallback }))
+      .map((credential: DomainLinkageCredential) => this.verifyDomainLinkageCredential({ credential, verifySignatureCallback: args.verifySignatureCallback }))
 
     if (credentialValidations.length === 0) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: `No credentials found for DID: ${args.did}`})
 

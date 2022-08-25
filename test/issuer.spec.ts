@@ -2,6 +2,7 @@ import nock from 'nock';
 
 import { WellKnownDidIssuer } from '../lib/issuer/WellKnownDidIssuer';
 import {
+  DomainLinkageCredential,
   IDidConfigurationResource,
   IIssueCallbackArgs,
   IIssueDidConfigurationResourceArgs,
@@ -43,7 +44,7 @@ const DID_CONFIGURATION = {
 
 let issuer: WellKnownDidIssuer;
 
-const issueCallback = async (args: IIssueCallbackArgs): Promise<ISignedDomainLinkageCredential | string> => {
+const issueCallback = async (args: IIssueCallbackArgs): Promise<DomainLinkageCredential> => {
   if (args.proofFormat === ProofFormatTypesEnum.JSON_WEB_TOKEN) {
     return COMPACT_JWT_DOMAIN_LINKAGE_CREDENTIAL;
   } else {
@@ -291,7 +292,7 @@ describe('Domain Linkage Issuer', () => {
       options: { proofFormat: ProofFormatTypesEnum.JSON_LD },
     };
 
-    const issueVcJsCallback = async (args: IIssueCallbackArgs): Promise<ISignedDomainLinkageCredential | string> => {
+    const issueVcJsCallback = async (args: IIssueCallbackArgs): Promise<DomainLinkageCredential> => {
       return await new VcJsIssuer().issue(args);
     };
 
