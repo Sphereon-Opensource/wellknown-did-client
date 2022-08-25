@@ -2,6 +2,7 @@ import fetch from 'cross-fetch';
 import jwt_decode, { JwtHeader, JwtPayload } from 'jwt-decode';
 
 import { WELL_KNOWN_DID_URI } from '../constants';
+import WDCErrors from "../constants/Errors";
 import { IDidConfigurationResource, ValidationStatusEnum } from '../types';
 
 /**
@@ -17,7 +18,7 @@ export const fetchWellKnownDidConfiguration = async (origin: string, verifyResou
   return fetch(url)
     .then((response: Response) => {
       if (response.status >= 400) {
-        return Promise.reject(Error(`Unable to retrieve did configuration resource from ${url}`))
+        return Promise.reject(Error(WDCErrors.UNABLE_TO_RETRIEVE_DID_CONFIG_RESOURCE_FROM+`${url}`))
       }
 
       if (!verifyResource) return response.json()
@@ -27,7 +28,7 @@ export const fetchWellKnownDidConfiguration = async (origin: string, verifyResou
         .then(() => resource))
     })
     .catch(() => {
-      return Promise.reject(Error(`Unable to retrieve did configuration resource from ${url}`))
+      return Promise.reject(Error(WDCErrors.UNABLE_TO_RETRIEVE_DID_CONFIG_RESOURCE_FROM+`${url}`))
     });
 }
 
@@ -38,17 +39,17 @@ export const fetchWellKnownDidConfiguration = async (origin: string, verifyResou
  */
 export const verifyResourceStructure = async (resource: IDidConfigurationResource): Promise<void> => {
   // @context MUST be present.
-  if (!resource['@context']) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property @context is not present' })
+  if (!resource['@context']) return Promise.reject({status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_CONTEXT_NOT_PRESENT })
 
   // linked_dids MUST be present.
-  if (!resource.linked_dids) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property linked_dids is not present' })
+  if (!resource.linked_dids) return Promise.reject({status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_LINKED_DIDS_NOT_PRESENT })
 
   // The value of linked_dids MUST be an array of DomainLinkageCredential entries.
-  if (resource.linked_dids.length === 0) return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Property linked_dids does not contain any domain linkage credentials' })
+  if (resource.linked_dids.length === 0) return Promise.reject({status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_LINKED_DIDS_DOES_NOT_CONTAIN_ANY_DOAMIN_LINK_CREDENTIALS })
 
   // Additional members MUST NOT be present in the header
   if (Object.getOwnPropertyNames(resource).filter(property => !['@context', 'linked_dids'].includes(property)).length > 0)
-    return Promise.reject({status: ValidationStatusEnum.INVALID, message: 'Resource contains additional properties' })
+    return Promise.reject({status: ValidationStatusEnum.INVALID, message: WDCErrors.RESOURCE_CONTAINS_ADDITIONAL_PROPS })
 }
 
 /**
