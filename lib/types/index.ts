@@ -1,6 +1,6 @@
 import {
   DIDDocument,
-  Service
+  ServiceEndpoint
 } from 'did-resolver'
 
 export interface IIssuerConfig {
@@ -114,7 +114,7 @@ export interface IVerifyDomainLinkageArgs {
 }
 
 export interface IVerifyEndpointDescriptorArgs {
-  descriptor: Service
+  descriptor: ServiceEndpoint
   verifySignatureCallback?: VerifyCallback
   // Option to only verify dids mentioned in the service endpoint descriptor
   onlyVerifyServiceDid?: boolean

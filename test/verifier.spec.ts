@@ -1,6 +1,8 @@
+import { ServiceEndpoint } from 'did-resolver/lib/resolver';
 import nock from 'nock';
 
 import { CONTEXT_URLS } from '../lib/constants';
+import WDCErrors from '../lib/constants/Errors';
 import { IVerifyCallbackArgs, IVerifyCredentialResult, ServiceTypesEnum, ValidationStatusEnum } from '../lib/types';
 import { WellKnownDidVerifier } from '../lib/verifier/WellKnownDidVerifier';
 
@@ -45,9 +47,7 @@ const DOCUMENT = {
     {
       id: `${DID}#foo`,
       type: ServiceTypesEnum.LINKED_DOMAINS,
-      serviceEndpoint: {
-        origins: [ORIGIN, ORIGIN],
-      },
+      serviceEndpoint: ORIGIN,
     },
     {
       id: `${DID}#bar`,
@@ -117,9 +117,7 @@ describe('Domain Linkage Verifier', () => {
       const endpointDescriptor = {
         id: DID,
         type: ServiceTypesEnum.LINKED_DOMAINS,
-        serviceEndpoint: {
-          origins: [ORIGIN],
-        },
+        serviceEndpoint: ORIGIN,
       };
 
       const result = await verifier.verifyEndpointDescriptor({ descriptor: endpointDescriptor });
@@ -131,29 +129,25 @@ describe('Domain Linkage Verifier', () => {
       const endpointDescriptor = {
         id: 'example_value',
         type: ServiceTypesEnum.LINKED_DOMAINS,
-        serviceEndpoint: {
-          origins: ['https://example.com'],
-        },
+        serviceEndpoint: 'https://example.com',
       };
 
       await expect(verifier.verifyEndpointDescriptor({ descriptor: endpointDescriptor })).rejects.toEqual({
         status: ValidationStatusEnum.INVALID,
-        message: 'Property id is not a valid did url',
+        message: WDCErrors.PROPERTY_ID_NOT_VALID_DID_URL,
       });
     });
 
     it('should reject when serviceEndpoint origins contains invalid origin', async () => {
-      const endpointDescriptor = {
+      const endpointDescriptor: ServiceEndpoint = {
         id: DID,
         type: ServiceTypesEnum.LINKED_DOMAINS,
-        serviceEndpoint: {
-          origins: ['https://example.com/path'],
-        },
+        serviceEndpoint: 'https://example.com/path',
       };
 
       await expect(verifier.verifyEndpointDescriptor({ descriptor: endpointDescriptor })).rejects.toEqual({
         status: ValidationStatusEnum.INVALID,
-        message: 'Property origins contains an invalid origins',
+        message: WDCErrors.PROPERTY_SERVICE_ENDPOINT_NOT_CONTAIN_VALID_ORIGIN,
       });
     });
 
@@ -166,7 +160,7 @@ describe('Domain Linkage Verifier', () => {
 
       await expect(verifier.verifyEndpointDescriptor({ descriptor: endpointDescriptor })).rejects.toEqual({
         status: ValidationStatusEnum.INVALID,
-        message: 'Property serviceEndpoint does not contain a valid origin',
+        message: WDCErrors.PROPERTY_SERVICE_ENDPOINT_NOT_CONTAIN_VALID_ORIGIN,
       });
     });
   });
@@ -241,14 +235,14 @@ describe('Domain Linkage Verifier', () => {
     it('should reject if issuanceDate is not a valid date value', async () => {
       await expect(verifier.verifyDomainLinkageCredential({ credential: { ...CREDENTIAL, issuanceDate: 'invalid_value' } })).rejects.toEqual({
         status: ValidationStatusEnum.INVALID,
-        message: 'Property issuanceDate is not a valid date',
+        message: WDCErrors.PROPERTY_ISSUANCE_DATE_NOT_VALID,
       });
     });
 
     it('should reject if expirationDate is not a valid date value', async () => {
       await expect(verifier.verifyDomainLinkageCredential({ credential: { ...CREDENTIAL, expirationDate: 'invalid_value' } })).rejects.toEqual({
         status: ValidationStatusEnum.INVALID,
-        message: 'Property expirationDate is not a valid date',
+        message: WDCErrors.PROPERTY_EXPIRATION_DATE_NOT_VALID,
       });
     });
 
@@ -257,13 +251,13 @@ describe('Domain Linkage Verifier', () => {
         verifier.verifyDomainLinkageCredential({
           credential: { ...CREDENTIAL, credentialSubject: { ...CREDENTIAL.credentialSubject, id: 'invalid_did' } },
         })
-      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'Property credentialSubject.id is not a valid did url' });
+      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_CREDENTIAL_SUBJECT_ID_NOT_VALID_DID });
     });
 
     it('should reject if credentialSubject.id does not match present issuer value', async () => {
       await expect(verifier.verifyDomainLinkageCredential({ credential: { ...CREDENTIAL, issuer: 'did:key:other' } })).rejects.toEqual({
         status: ValidationStatusEnum.INVALID,
-        message: 'Property credentialSubject.id does not match issuer property',
+        message: WDCErrors.PROPERTY_CREDENTIAL_SUBJECT_ID_NOT_MATCH_ISSUER,
       });
     });
 
@@ -272,7 +266,7 @@ describe('Domain Linkage Verifier', () => {
         verifier.verifyDomainLinkageCredential({
           credential: { ...CREDENTIAL, credentialSubject: { ...CREDENTIAL.credentialSubject, origin: 'invalid_origin' } },
         })
-      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'Property credentialSubject.origin is not a valid origin' });
+      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_CREDENTIAL_SUBJECT_ORIGIN_NOT_VALID });
     });
 
     it('should reject if kid is not present in JWT header', async () => {
@@ -281,7 +275,7 @@ describe('Domain Linkage Verifier', () => {
           credential:
             'eyJhbGciOiJSUzI1NiJ9.eyJleHAiOjE3NjQ4NzkxMzksImlzcyI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwibmJmIjoxNjA3MTEyNzM5LCJzdWIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9pZGVudGl0eS5mb3VuZGF0aW9uLy53ZWxsLWtub3duL2RpZC1jb25maWd1cmF0aW9uL3YxIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleTp6Nk1rb1RIc2dOTnJieThKekNOUTFpUkx5VzVRUTZSOFh1dTZBQThpZ0dyTVZQVU0iLCJvcmlnaW4iOiJodHRwczovL2lkZW50aXR5LmZvdW5kYXRpb24ifSwiZXhwaXJhdGlvbkRhdGUiOiIyMDI1LTEyLTA0VDE0OjEyOjE5LTA2OjAwIiwiaXNzdWFuY2VEYXRlIjoiMjAyMC0xMi0wNFQxNDoxMjoxOS0wNjowMCIsImlzc3VlciI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkRvbWFpbkxpbmthZ2VDcmVkZW50aWFsIl19fQ.FHzxFzKCiyznW0uGvJ_NjU9Q6NlEyq4REGyjnD24TPPSgwxDv3FF8Rj3MR7GjT_buE66dp5ZRMCEgvBQK3iOlf3-yI9XO5pJLKlBU1AD1R7AkrDTEvKi6BsWutX83PsOL2loz-1xuBed0mJT7MmliVbCEBDUbKrSQtX7pDUlvSy_JdX1ywVaLBd4DsbsjxsTnKxoFjd2bqrdTG9CysaVz-cBckvwbxLewLLNtMn2QMtNr2_BUgYg0D9w6awSM2xU528C575ornSqxUlN5htE1bHR7U_tnsJjNzfSfkY51loBn5YCbNQD4dLimzVZhq32TfG5YSsIsEdk00al94wVYQ',
         })
-      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'Property kid is not present in JWT header' });
+      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_KID_NOT_PRESENT_IN_JWT_HEADER });
     });
 
     it('should reject if JWT header has additional properties', async () => {
@@ -290,7 +284,7 @@ describe('Domain Linkage Verifier', () => {
           credential:
             'eyJhbGciOiJSUzI1NiIsImtpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNI3o2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsImFkZGl0aW9uYWxfZmllbGQiOiJ2YWx1ZSJ9.eyJleHAiOjE3NjQ4NzkxMzksImlzcyI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwibmJmIjoxNjA3MTEyNzM5LCJzdWIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9pZGVudGl0eS5mb3VuZGF0aW9uLy53ZWxsLWtub3duL2RpZC1jb25maWd1cmF0aW9uL3YxIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleTp6Nk1rb1RIc2dOTnJieThKekNOUTFpUkx5VzVRUTZSOFh1dTZBQThpZ0dyTVZQVU0iLCJvcmlnaW4iOiJodHRwczovL2lkZW50aXR5LmZvdW5kYXRpb24ifSwiZXhwaXJhdGlvbkRhdGUiOiIyMDI1LTEyLTA0VDE0OjEyOjE5LTA2OjAwIiwiaXNzdWFuY2VEYXRlIjoiMjAyMC0xMi0wNFQxNDoxMjoxOS0wNjowMCIsImlzc3VlciI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkRvbWFpbkxpbmthZ2VDcmVkZW50aWFsIl19fQ.cXqXYTPQjyDgWG0XP4QEyoX2QwVIYdii4bWHX3Eeg5VylrQaSNXddWNUOiQ47wtfihbOaE9k52iaIb9_qhci-uk1An0FyDZOzuzAfo3tfCR1kBFyY72VxxAoxEqdVTqPoIlJMU-79Fp8WUiB9hukbatoFP98rbaSO2wEugaD-FBjcBB6j_-xxWYiKWtivE526LBDn4JhiKlDcI--k1dG9qtqfriD344QdI9Jox80FDZpRIolNAXK_HTvBbHwNSMpdu9r4rbs4zfVsSOsdTSwu8uvBXSxi8u9VUUyhQq--L8WGSXLjncb5BgiBWSR7YZsjWcCYlS8vkLpsltHxdq00g',
         })
-      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'JWT header contains additional properties' });
+      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: WDCErrors.JWT_HEADER_CONTAINS_ADDITIONAL_PROPS });
     });
 
     it('should reject if iss is not present in JWT payload', async () => {
@@ -299,7 +293,7 @@ describe('Domain Linkage Verifier', () => {
           credential:
             'eyJhbGciOiJSUzI1NiIsImtpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNI3o2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSJ9.eyJleHAiOjE3NjQ4NzkxMzksIm5iZiI6MTYwNzExMjczOSwic3ViIjoiZGlkOmtleTp6Nk1rb1RIc2dOTnJieThKekNOUTFpUkx5VzVRUTZSOFh1dTZBQThpZ0dyTVZQVU0iLCJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vaWRlbnRpdHkuZm91bmRhdGlvbi8ud2VsbC1rbm93bi9kaWQtY29uZmlndXJhdGlvbi92MSJdLCJjcmVkZW50aWFsU3ViamVjdCI6eyJpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwib3JpZ2luIjoiaHR0cHM6Ly9pZGVudGl0eS5mb3VuZGF0aW9uIn0sImV4cGlyYXRpb25EYXRlIjoiMjAyNS0xMi0wNFQxNDoxMjoxOS0wNjowMCIsImlzc3VhbmNlRGF0ZSI6IjIwMjAtMTItMDRUMTQ6MTI6MTktMDY6MDAiLCJpc3N1ZXIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJEb21haW5MaW5rYWdlQ3JlZGVudGlhbCJdfX0.e9aNtnNJhqgCWwuQsgYYxFoL04TPLLyXmJRyvxKPfPH22EOjrXLGPGEaWoHvPyK1GjS3RrnmGDnydGAaprOL2WqYUTZGHlZjI4m5w00AR14hghytOFys84OT0RSdE4fsEt2Lro6aCAG5RdCurX7DYqDslS7htkuMQMGzqchXEazmzSXJ7OoElg9mh0YxQw0xPONf3KBnrJP7UiL2ygtxUWMcMvFyG79t-zxATREqwmBjJKZTzngD75t9dPAJs6DJPMkyp4FyD7jDQwJABR0IOHlENs-bB3uWecrnnAFJGxmeX0i2JTEcvsdqeepdMm8PwDVrmdziKD50xiiPVYIwJA',
         })
-      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'Property iss is not present in JWT payload' });
+      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_ISS_NOT_PRESENT_IN_JWT_PAYLOAD });
     });
 
     it('should reject if sub is not present in JWT payload', async () => {
@@ -308,7 +302,7 @@ describe('Domain Linkage Verifier', () => {
           credential:
             'eyJhbGciOiJSUzI1NiIsImtpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNI3o2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSJ9.eyJleHAiOjE3NjQ4NzkxMzksImlzcyI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwibmJmIjoxNjA3MTEyNzM5LCJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsImh0dHBzOi8vaWRlbnRpdHkuZm91bmRhdGlvbi8ud2VsbC1rbm93bi9kaWQtY29uZmlndXJhdGlvbi92MSJdLCJjcmVkZW50aWFsU3ViamVjdCI6eyJpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwib3JpZ2luIjoiaHR0cHM6Ly9pZGVudGl0eS5mb3VuZGF0aW9uIn0sImV4cGlyYXRpb25EYXRlIjoiMjAyNS0xMi0wNFQxNDoxMjoxOS0wNjowMCIsImlzc3VhbmNlRGF0ZSI6IjIwMjAtMTItMDRUMTQ6MTI6MTktMDY6MDAiLCJpc3N1ZXIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJEb21haW5MaW5rYWdlQ3JlZGVudGlhbCJdfX0.gCXulAWRv29SrMsSG1Hdsn34eArQsITMCTajgvcP4JxdNu-peq9cYOAoWN-nBK4oub5e5fQwo39a1TUvVwKj3ykTuQ0jrl_bozwA4tNUL-snNsSO657SR0Od9iZD7-Izk6PNbHWosLvvFx1skpJjKNzN-FXonPopw2yI7sDzeJtbzX-WFdaUxdDe37VQPQ2QKMo9T9HaWiY_-gQvSSQ1pHsJvq_Vs8UIYyBDVUfEoP_8h9vb9oQDXXhTNkZCtW-LPOLjPaf7LK8xqYL8hKsawehVtXaxq1fozEa8t2BqhmRj9O5Ybcy6ISs4IZxMBsoH4u6vrbhB6xeroAuxAZEF1Q',
         })
-      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'Property sub is not present in JWT payload' });
+      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_SUB_NOT_PRESENT_IN_JWT_PAYLOAD });
     });
 
     it('should reject if vc is not present in JWT payload', async () => {
@@ -317,7 +311,7 @@ describe('Domain Linkage Verifier', () => {
           credential:
             'eyJhbGciOiJSUzI1NiIsImtpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNI3o2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSJ9.eyJleHAiOjE3NjQ4NzkxMzksImlzcyI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwibmJmIjoxNjA3MTEyNzM5LCJzdWIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSJ9.KHe1HKgqCyv_OFV4JduZ8e6yFr-efafOF128AWUJdN9IrFrnfm9e3OSwRjphn6QToLyikO5gUtVdhh7upgwPrdRa6Y9tyXYAb89R6cf98yiWD6LIS7Pd_saqjr7pwY6XEDK4oUIk5qg-KknTegtLVU-a3YSb5jOJGwnx_7LKFBintQ-YMXVxV7RbYUnil7iCqUBjleYXwpib54rlXvl4BcFiMBB2TWjCn3lABCZxp0iQHDxGmkfC8l_QSCx8Zmz-9u9tBmbuEW3aA85MepX9J3u5ZLhDr8op5n6QzfDLQKFJnxBQC_7ljUpby6mpfByxKZli0pebrl5v7xfKOlfcLw',
         })
-      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'Property vc is not present in JWT payload' });
+      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_VC_NOT_PRESENT_IN_JWT_PAYLOAD });
     });
 
     it('should reject if iss does not match credentialSubject id', async () => {
@@ -326,7 +320,7 @@ describe('Domain Linkage Verifier', () => {
           credential:
             'eyJhbGciOiJSUzI1NiIsImtpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNI3o2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSJ9.eyJleHAiOjE3NjQ4NzkxMzksImlzcyI6Im90aGVyX3ZhbHVlIiwibmJmIjoxNjA3MTEyNzM5LCJzdWIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9pZGVudGl0eS5mb3VuZGF0aW9uLy53ZWxsLWtub3duL2RpZC1jb25maWd1cmF0aW9uL3YxIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleTp6Nk1rb1RIc2dOTnJieThKekNOUTFpUkx5VzVRUTZSOFh1dTZBQThpZ0dyTVZQVU0iLCJvcmlnaW4iOiJodHRwczovL2lkZW50aXR5LmZvdW5kYXRpb24ifSwiZXhwaXJhdGlvbkRhdGUiOiIyMDI1LTEyLTA0VDE0OjEyOjE5LTA2OjAwIiwiaXNzdWFuY2VEYXRlIjoiMjAyMC0xMi0wNFQxNDoxMjoxOS0wNjowMCIsImlzc3VlciI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkRvbWFpbkxpbmthZ2VDcmVkZW50aWFsIl19fQ.Jzj6tA9UbiAnzRHIwOGeH2sQCELuSLfw4lBg6aUvnYPJNok5cBYFS36Wd81BgBRpSHwOkH5OINk2bYG_ZG_cvPgtOVDxhIcskj6n-tGW_wG_Kicf8DKKl3EXwUzr8p1EElavgVTehfsjCXrWcvmpyakEUVN-PrmCCG8bd-3rgCKzKuq4EWeN0GMpa9IebmSpKnJW9iwDLlxAyYUt_tWoMbex17THdzbscoLQvRWfYB-libABS0u30__j1bjtGPZUXgiYcG4twWivVACRw2oIFb0d1JYy0jpBuF8aAC8JbTcRktiAd9CJTRJkctcUrrjj_pHfKeTORQGbZ8nGGJfjpA',
         })
-      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'Property iss does not match credentialSubject id in JWT payload' });
+      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_ISS_NOT_MATCH_CREDENTIAL_SUBJECT_ID_IN_JWT_PAYLOAD });
     });
 
     it('should reject if iss does not match credentialSubject id', async () => {
@@ -335,7 +329,7 @@ describe('Domain Linkage Verifier', () => {
           credential:
             'eyJhbGciOiJSUzI1NiIsImtpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNI3o2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSJ9.eyJleHAiOjE3NjQ4NzkxMzksImlzcyI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwibmJmIjoxNjA3MTEyNzM5LCJzdWIiOiJvdGhlcl92YWx1ZSIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9pZGVudGl0eS5mb3VuZGF0aW9uLy53ZWxsLWtub3duL2RpZC1jb25maWd1cmF0aW9uL3YxIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleTp6Nk1rb1RIc2dOTnJieThKekNOUTFpUkx5VzVRUTZSOFh1dTZBQThpZ0dyTVZQVU0iLCJvcmlnaW4iOiJodHRwczovL2lkZW50aXR5LmZvdW5kYXRpb24ifSwiZXhwaXJhdGlvbkRhdGUiOiIyMDI1LTEyLTA0VDE0OjEyOjE5LTA2OjAwIiwiaXNzdWFuY2VEYXRlIjoiMjAyMC0xMi0wNFQxNDoxMjoxOS0wNjowMCIsImlzc3VlciI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkRvbWFpbkxpbmthZ2VDcmVkZW50aWFsIl19fQ.mOik2yXm8BszIbaxWio1OkOL5szcDDQfPUW2j6q30Niqd-rwjJHvK7Hoq_Ld9vQsEg61dM0GIGq3o9EvPtdvfZXLSSd1kz4RVM0Rb_ZFq9_jXagQC07MEXdJ0ou36kr-WND8MMWOV3naDRvObQYELdlzGusUKazXGCVhiI-TNPqGzihqAGsIatiqEgsji5g5AbzJ2NCVg0CXRdESaF1ZVMVUSOzuM-YH2mc9pAvKquntv7vB2kpMt-JY1KF4QJySLiq8ghG7Wr1ew_iw2EVaqbXScd63nUJpiexyXQU7EzFus7wL0wE0NNFltU_Wl8lm9simSw0GSqYBaN-sGmrh0A',
         })
-      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'Property sub does not match credentialSubject id in JWT payload' });
+      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_SUB_NOT_MATCH_CREDENTIAL_SUBJECT_ID_IN_JWT_PAYLOAD });
     });
 
     it('should reject if payload has additional properties', async () => {
@@ -344,7 +338,7 @@ describe('Domain Linkage Verifier', () => {
           credential:
             'eyJhbGciOiJSUzI1NiIsImtpZCI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNI3o2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSJ9.eyJleHAiOjE3NjQ4NzkxMzksImlzcyI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwibmJmIjoxNjA3MTEyNzM5LCJzdWIiOiJkaWQ6a2V5Ono2TWtvVEhzZ05OcmJ5OEp6Q05RMWlSTHlXNVFRNlI4WHV1NkFBOGlnR3JNVlBVTSIsImFkZGl0aW9uYWxfcHJvcGVydHkiOiJ2YWx1ZSIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9pZGVudGl0eS5mb3VuZGF0aW9uLy53ZWxsLWtub3duL2RpZC1jb25maWd1cmF0aW9uL3YxIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImlkIjoiZGlkOmtleTp6Nk1rb1RIc2dOTnJieThKekNOUTFpUkx5VzVRUTZSOFh1dTZBQThpZ0dyTVZQVU0iLCJvcmlnaW4iOiJodHRwczovL2lkZW50aXR5LmZvdW5kYXRpb24ifSwiZXhwaXJhdGlvbkRhdGUiOiIyMDI1LTEyLTA0VDE0OjEyOjE5LTA2OjAwIiwiaXNzdWFuY2VEYXRlIjoiMjAyMC0xMi0wNFQxNDoxMjoxOS0wNjowMCIsImlzc3VlciI6ImRpZDprZXk6ejZNa29USHNnTk5yYnk4SnpDTlExaVJMeVc1UVE2UjhYdXU2QUE4aWdHck1WUFVNIiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkRvbWFpbkxpbmthZ2VDcmVkZW50aWFsIl19fQ.grcju8cwvrVBGwS7UzVE-Gt0x6ZytBM3XrooqLOX36zLne2XrWmgWNNeB7ESk1Nnjp7tqTwDU4Q0Cg_Jlo0o8IPscR7I5UHk3iD_T8EBdSHKKTVqu8fN_zOUrZmCTgnf2JGl40bHjLIG_PZS8YWB9RoFzAVgTIWs3pAoAnSKJy5rJawBaGSYaEhx1kIfRGEjBCZXM9EUesd3BB9nXyC1QVRjHCxhH_O62Wrdi5CqAIzrRaZln6wAnMXoTD8zbP-5TT_dnbt9aq680zv7TpfuTuvaf60CQR536h7b7yEJqA2GN5lXAVTLGMH0E-n4jZ-tFRyCmDsIfQ0bPhV3iVfQZg',
         })
-      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: 'JWT payload contains additional properties' });
+      ).rejects.toEqual({ status: ValidationStatusEnum.INVALID, message: WDCErrors.JWT_PAYLOAD_CONTAINS_ADDITIONAL_PROPS });
     });
 
     it('should reject credfential signature is invalid', async () => {
