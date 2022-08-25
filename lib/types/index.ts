@@ -4,7 +4,7 @@ import {
 } from 'did-resolver'
 
 export interface IIssuerConfig {
-  issueCallback: (args: IIssueCallbackArgs) => Promise<ISignedDomainLinkageCredential | string>
+  issueCallback: IssuanceCallback
 }
 
 export interface IDomainLinkageCredential {
@@ -43,7 +43,7 @@ export interface IIssueDidConfigurationResourceArgs {
   issuances: Array<IIssueDomainLinkageCredentialArgs>
   configuration?: IDidConfigurationResource
   origin?: string
-  issueCallback?: (args: IIssueCallbackArgs) => Promise<ISignedDomainLinkageCredential | string>
+  issueCallback?: IssuanceCallback
 }
 
 export interface IIssueDomainLinkageCredentialArgs {
@@ -52,7 +52,7 @@ export interface IIssueDomainLinkageCredentialArgs {
   issuanceDate?: string
   expirationDate: string
   options: IIssueDomainLinkageCredentialOptions
-  issueCallback?: (args: IIssueCallbackArgs) => Promise<ISignedDomainLinkageCredential | string>
+  issueCallback?: IssuanceCallback
 }
 
 export enum ProofFormatTypesEnum {
@@ -71,11 +71,11 @@ export interface IIssueDomainLinkageCredentialOptions {
 
 export interface IDidConfigurationResource {
   '@context': string
-  linked_dids: Array<ISignedDomainLinkageCredential | string>
+  linked_dids: Array<DomainLinkageCredential>
 }
 
 export interface IVerifierConfig {
-  verifySignatureCallback: (args: IVerifyCallbackArgs) => Promise<IVerifyCredentialResult>
+  verifySignatureCallback: VerifyCallback
   // Option to only verify dids mentioned in the service endpoint descriptor
   onlyVerifyServiceDid?: boolean
 }
@@ -102,20 +102,20 @@ export interface IVerifyCredentialResult {
 }
 
 export interface IVerifyCallbackArgs {
-  credential: ISignedDomainLinkageCredential | string
+  credential: DomainLinkageCredential
   proofFormat?: ProofFormatTypesEnum
 }
 
 export interface IVerifyDomainLinkageArgs {
   didDocument: DIDDocument
-  verifySignatureCallback?: (args: IVerifyCallbackArgs) => Promise<IVerifyCredentialResult>
+  verifySignatureCallback?: VerifyCallback
   // Option to only verify dids mentioned in the service endpoint descriptor
   onlyVerifyServiceDid?: boolean
 }
 
 export interface IVerifyEndpointDescriptorArgs {
   descriptor: ServiceEndpoint
-  verifySignatureCallback?: (args: IVerifyCallbackArgs) => Promise<IVerifyCredentialResult>
+  verifySignatureCallback?: VerifyCallback
   // Option to only verify dids mentioned in the service endpoint descriptor
   onlyVerifyServiceDid?: boolean
 }
@@ -124,12 +124,12 @@ export interface IVerifyResourceArgs {
   configuration?: IDidConfigurationResource
   origin?: string
   did?: string
-  verifySignatureCallback?: (args: IVerifyCallbackArgs) => Promise<IVerifyCredentialResult>
+  verifySignatureCallback?: VerifyCallback
 }
 
 export interface IVerifyDomainLinkageCredentialArgs {
-  credential: ISignedDomainLinkageCredential | string
-  verifySignatureCallback?: (args: IVerifyCallbackArgs) => Promise<IVerifyCredentialResult>
+  credential: DomainLinkageCredential
+  verifySignatureCallback?: VerifyCallback
 }
 
 export type StrictPropertyCheck<T, TExpected, TError> = Exclude<keyof T, keyof TExpected> extends never ? unknown : TError;
@@ -170,3 +170,9 @@ export enum PromiseStatusEnum {
   REJECTED = 'rejected',
   FULFILLED = 'fulfilled',
 }
+
+export type DomainLinkageCredential = ISignedDomainLinkageCredential | string
+
+export type IssuanceCallback = (args: IIssueCallbackArgs) => Promise<DomainLinkageCredential>
+
+export type VerifyCallback = (args: IVerifyCallbackArgs) => Promise<IVerifyCredentialResult>
