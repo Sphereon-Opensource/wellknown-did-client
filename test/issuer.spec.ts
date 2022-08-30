@@ -1,5 +1,6 @@
 import nock from 'nock';
 
+import { WDCErrors } from '../lib';
 import { WellKnownDidIssuer } from '../lib/issuer/WellKnownDidIssuer';
 import {
   DomainLinkageCredential,
@@ -257,7 +258,7 @@ describe('Domain Linkage Issuer', () => {
       options: { proofFormat: ProofFormatTypesEnum.JSON_LD },
     };
 
-    await expect(issuer.issueDomainLinkageCredential(args)).rejects.toThrow('origin is not a valid origin');
+    await expect(issuer.issueDomainLinkageCredential(args)).rejects.toThrow(WDCErrors.ORIGIN_NOT_VALID);
   });
 
   it('should throw error when issuanceDate is not a valid date', async () => {

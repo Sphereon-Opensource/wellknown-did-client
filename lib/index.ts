@@ -3,4 +3,5 @@ import { WellKnownDidVerifier } from './verifier/WellKnownDidVerifier';
 
 export { WellKnownDidIssuer };
 export { WellKnownDidVerifier };
+export * from './constants'
 export * from './types'

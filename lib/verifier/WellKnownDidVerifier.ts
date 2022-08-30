@@ -1,7 +1,7 @@
 import { parseDid } from '@sphereon/ssi-sdk-core';
 import { ServiceEndpoint } from 'did-resolver/lib/resolver';
 
-import WDCErrors from "../constants/Errors";
+import { WDCErrors } from "../constants";
 import {
   DomainLinkageCredential,
   ICredentialValidation,
