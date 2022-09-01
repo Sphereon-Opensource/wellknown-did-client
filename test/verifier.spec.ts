@@ -88,10 +88,14 @@ describe('Domain Linkage Verifier', () => {
 
   it('should verify domain linkage from a given ion did document', async () => {
     nock(ORIGIN).get('/.well-known/did-configuration.json').times(3).reply(200, DID_CONFIGURATION);
-
-    DOCUMENT.service[0].id = '#foo';
-    DOCUMENT.service[0].id = '#bar';
-    const result = await verifier.verifyDomainLinkage({ didDocument: DOCUMENT });
+    const NEW_DOCUMENT = {
+      ...DOCUMENT,
+      service: [
+        { ...DOCUMENT.service[0], id: '#foo' },
+        { ...DOCUMENT.service[1], id: '#bar' },
+      ],
+    };
+    const result = await verifier.verifyDomainLinkage({ didDocument: NEW_DOCUMENT });
 
     expect(result.status).toEqual(ValidationStatusEnum.VALID);
   });

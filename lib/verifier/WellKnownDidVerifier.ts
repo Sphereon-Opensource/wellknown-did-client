@@ -59,7 +59,7 @@ export class WellKnownDidVerifier {
 
     const descriptorValidations = linkedDomainsEndpointDescriptors.map((descriptor: ServiceEndpoint) => {
       if(descriptor.id.startsWith('#')) {
-        descriptor.id = args.didDocument.id+descriptor.id;
+        descriptor.id = `${args.didDocument.id}${descriptor.id}`
       }
       return this.verifyEndpointDescriptor({
         descriptor,
