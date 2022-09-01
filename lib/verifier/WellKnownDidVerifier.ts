@@ -58,6 +58,7 @@ export class WellKnownDidVerifier {
     if (linkedDomainsEndpointDescriptors.length === 0) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_SERVICE_NOT_CONTAIN_ANY_SERVICE_WITH_TYPE+`${ServiceTypesEnum.LINKED_DOMAINS}` })
 
     const descriptorValidations = linkedDomainsEndpointDescriptors.map((descriptor: ServiceEndpoint) => this.verifyEndpointDescriptor({
+      didDocumentId: args.didDocument.id,
       descriptor,
       verifySignatureCallback: args.verifySignatureCallback,
       onlyVerifyServiceDid: args.onlyVerifyServiceDid
@@ -85,7 +86,7 @@ export class WellKnownDidVerifier {
       return Promise.reject(Error(WDCErrors.MUST_SUPPLY_VERIFY_SIGNATURE_CALLBACK))
     }
 
-    return this.verifyEndpointDescriptorStructure(args.descriptor).then(async () => {
+    return this.verifyEndpointDescriptorStructure(args.descriptor, args.didDocumentId).then(async () => {
       const resourceValidations = this.getOrigins(args.descriptor)
         .map((origin: string) => fetchWellKnownDidConfiguration(origin)
           .then((didConfigurationResource: IDidConfigurationResource) =>
@@ -220,15 +221,16 @@ export class WellKnownDidVerifier {
    * Verifies the endpoint descriptor object structure.
    *
    * @param descriptor The endpoint descriptor.
+   * @param didDocumentId the id of didDocument
    */
-  private async verifyEndpointDescriptorStructure(descriptor: ServiceEndpoint): Promise<void> {
+  private async verifyEndpointDescriptorStructure(descriptor: ServiceEndpoint, didDocumentId?: string): Promise<void> {
     // The object MUST contain an id property
     if (!descriptor.id)
       return Promise.reject({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_ID_NOT_PRESENT_IN_SERVICE})
     // The object id property value MUST be a valid DID URL reference
 
     try {
-      parseDid(descriptor.id)
+      descriptor.id.startsWith('#') && didDocumentId ? parseDid(didDocumentId): parseDid(descriptor.id)
     } catch (error: unknown) {
       return Promise.reject({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_ID_NOT_VALID_DID_URL })
     }

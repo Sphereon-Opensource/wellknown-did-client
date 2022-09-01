@@ -114,6 +114,7 @@ export interface IVerifyDomainLinkageArgs {
 }
 
 export interface IVerifyEndpointDescriptorArgs {
+  didDocumentId?: string
   descriptor: ServiceEndpoint
   verifySignatureCallback?: VerifyCallback
   // Option to only verify dids mentioned in the service endpoint descriptor
