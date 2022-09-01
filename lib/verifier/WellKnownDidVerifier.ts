@@ -1,7 +1,7 @@
 import { parseDid } from '@sphereon/ssi-sdk-core';
 import { ServiceEndpoint } from 'did-resolver/lib/resolver';
 
-import WDCErrors from "../constants/Errors";
+import { WDCErrors } from "../constants";
 import {
   DomainLinkageCredential,
   ICredentialValidation,
@@ -57,11 +57,16 @@ export class WellKnownDidVerifier {
     const linkedDomainsEndpointDescriptors: Array<ServiceEndpoint> = args.didDocument.service.filter((service: ServiceEndpoint) => service.type = ServiceTypesEnum.LINKED_DOMAINS)
     if (linkedDomainsEndpointDescriptors.length === 0) return Promise.reject({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_SERVICE_NOT_CONTAIN_ANY_SERVICE_WITH_TYPE+`${ServiceTypesEnum.LINKED_DOMAINS}` })
 
-    const descriptorValidations = linkedDomainsEndpointDescriptors.map((descriptor: ServiceEndpoint) => this.verifyEndpointDescriptor({
-      descriptor,
-      verifySignatureCallback: args.verifySignatureCallback,
-      onlyVerifyServiceDid: args.onlyVerifyServiceDid
-    }))
+    const descriptorValidations = linkedDomainsEndpointDescriptors.map((descriptor: ServiceEndpoint) => {
+      if(descriptor.id.startsWith('#')) {
+        descriptor.id = `${args.didDocument.id}${descriptor.id}`
+      }
+      return this.verifyEndpointDescriptor({
+        descriptor,
+        verifySignatureCallback: args.verifySignatureCallback,
+        onlyVerifyServiceDid: args.onlyVerifyServiceDid
+      })
+    })
 
     return await Promise.allSettled(descriptorValidations)
       .then((results: Array<PromiseSettledResult<IDescriptorValidation>>) => {

@@ -1,6 +1,6 @@
 import { parseDid } from '@sphereon/ssi-sdk-core';
 
-import { CONTEXT_URLS } from '../constants';
+import { CONTEXT_URLS, WDCErrors } from '../constants';
 import {
   DomainLinkageCredential,
   IDidConfigurationResource,
@@ -27,15 +27,15 @@ export class WellKnownDidIssuer {
    */
   public async issueDidConfigurationResource(args: IIssueDidConfigurationResourceArgs): Promise<IDidConfigurationResource> {
     if (args.configuration && args.origin) {
-      return Promise.reject(Error('Cannot supply both a configuration and an origin. Only one should be supplied at the same time.'))
+      return Promise.reject(Error(WDCErrors.CANT_SUPPLY_BOTH_CONFIGURATION_AND_ORIGIN))
     }
 
     if (!args.issueCallback && (!this.config || !this.config?.issueCallback) && args.issuances.some(issuance => !issuance.issueCallback)) {
-      return Promise.reject(Error('issueCallback needs to be supplied via parameter or config'))
+      return Promise.reject(Error(WDCErrors.MUST_SUPPLY_ISSUE_CALLBACK))
     }
 
     if (args.origin && args.issuances.filter(issuance => issuance.origin !== args.origin).length > 0) {
-      return Promise.reject(Error('One or more issuances have an origin that does not match the provided origin'))
+      return Promise.reject(Error(WDCErrors.ISSUANCE_ORIGIN_DOES_NOT_MATCH_PROVIDED_ORIGIN))
     }
 
     let didConfigurationResource: IDidConfigurationResource;
@@ -70,21 +70,21 @@ export class WellKnownDidIssuer {
    */
   public async issueDomainLinkageCredential(args: IIssueDomainLinkageCredentialArgs): Promise<DomainLinkageCredential> {
     if (!args.issueCallback && (!this.config || !this.config?.issueCallback)) {
-      return Promise.reject(Error('issueCallback needs to be supplied via parameter or config'))
+      return Promise.reject(Error(WDCErrors.MUST_SUPPLY_ISSUE_CALLBACK))
     }
 
     const did: string = parseDid(args.did).did
 
     if (new URL(args.origin).origin !== args.origin) {
-      return Promise.reject(Error('origin is not a valid origin'))
+      return Promise.reject(Error(WDCErrors.ORIGIN_NOT_VALID))
     }
 
     if (args.issuanceDate && isNaN(Date.parse(args.issuanceDate))) {
-      return Promise.reject(Error('issuanceDate is not a valid date'))
+      return Promise.reject(Error(WDCErrors.PROPERTY_ISSUANCE_DATE_NOT_VALID))
     }
 
     if (isNaN(Date.parse(args.expirationDate))) {
-      return Promise.reject(Error('expirationDate is not a valid date'))
+      return Promise.reject(Error(WDCErrors.PROPERTY_EXPIRATION_DATE_NOT_VALID))
     }
 
     const credential: IDomainLinkageCredential = {

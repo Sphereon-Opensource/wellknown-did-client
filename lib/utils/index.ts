@@ -1,8 +1,7 @@
 import fetch from 'cross-fetch';
 import jwt_decode, { JwtHeader, JwtPayload } from 'jwt-decode';
 
-import { WELL_KNOWN_DID_URI } from '../constants';
-import WDCErrors from "../constants/Errors";
+import { WDCErrors, WELL_KNOWN_DID_URI } from '../constants';
 import { IDidConfigurationResource, ValidationStatusEnum } from '../types';
 
 /**
@@ -45,7 +44,7 @@ export const verifyResourceStructure = async (resource: IDidConfigurationResourc
   if (!resource.linked_dids) return Promise.reject({status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_LINKED_DIDS_NOT_PRESENT })
 
   // The value of linked_dids MUST be an array of DomainLinkageCredential entries.
-  if (resource.linked_dids.length === 0) return Promise.reject({status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_LINKED_DIDS_DOES_NOT_CONTAIN_ANY_DOAMIN_LINK_CREDENTIALS })
+  if (resource.linked_dids.length === 0) return Promise.reject({status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_LINKED_DIDS_DOES_NOT_CONTAIN_ANY_DOMAIN_LINK_CREDENTIALS })
 
   // Additional members MUST NOT be present in the header
   if (Object.getOwnPropertyNames(resource).filter(property => !['@context', 'linked_dids'].includes(property)).length > 0)

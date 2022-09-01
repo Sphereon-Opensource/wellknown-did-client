@@ -86,6 +86,20 @@ describe('Domain Linkage Verifier', () => {
     expect(result.status).toEqual(ValidationStatusEnum.VALID);
   });
 
+  it('should verify domain linkage from a given ion did document', async () => {
+    nock(ORIGIN).get('/.well-known/did-configuration.json').times(3).reply(200, DID_CONFIGURATION);
+    const NEW_DOCUMENT = {
+      ...DOCUMENT,
+      service: [
+        { ...DOCUMENT.service[0], id: '#foo' },
+        { ...DOCUMENT.service[1], id: '#bar' },
+      ],
+    };
+    const result = await verifier.verifyDomainLinkage({ didDocument: NEW_DOCUMENT });
+
+    expect(result.status).toEqual(ValidationStatusEnum.VALID);
+  });
+
   it('should only verify service DIDs when onlyVerifyServiceDid is true', async () => {
     nock(ORIGIN).get('/.well-known/did-configuration.json').times(3).reply(200, DID_CONFIGURATION);
 
