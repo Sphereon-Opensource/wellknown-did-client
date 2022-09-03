@@ -1,4 +1,4 @@
-import { parseDid } from '@sphereon/ssi-sdk-core';
+import { parseDid } from '@sphereon/ssi-types';
 
 import { CONTEXT_URLS, WDCErrors } from '../constants';
 import {

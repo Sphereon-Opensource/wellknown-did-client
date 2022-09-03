@@ -30,7 +30,7 @@
     "DID Configuration Resource"
   ],
   "dependencies": {
-    "@sphereon/ssi-sdk-core": "^0.7.0",
+    "@sphereon/ssi-types": "^0.8.1-next.2",
     "cross-fetch": "^3.1.5",
     "jwt-decode": "^3.1.2"
   },
@@ -40,7 +40,7 @@
     "@digitalcredentials/jsonld-signatures": "^9.3.1",
     "@digitalcredentials/vc": "^4.1.1",
     "did-resolver": "~3.1.5",
-    "typescript": "^4.6.4",
+    "typescript": "4.6.4",
     "ts-node": "^10.9.1",
     "@types/node": "^14.18.23",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
