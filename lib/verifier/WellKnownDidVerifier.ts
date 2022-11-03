@@ -249,13 +249,17 @@ export class WellKnownDidVerifier {
     if (!descriptor.serviceEndpoint)
       return Promise.reject({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_SERVICE_ENDPOINT_NOT_PRESENT_IN_SERVICE })
 
-     // The object serviceEndpoint property can be a string and the value MUST be an origin string
-    if (new URL(descriptor.serviceEndpoint).origin !== descriptor.serviceEndpoint)
-      return Promise.reject({status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_SERVICE_ENDPOINT_NOT_CONTAIN_VALID_ORIGIN})
-    if (new URL(descriptor.serviceEndpoint).protocol !== 'https:') return Promise.reject({
-      status: ValidationStatusEnum.INVALID,
-      message: WDCErrors.PROPERTY_ORIGIN_NOT_SECURE
-    })
+
+    if (typeof descriptor.serviceEndpoint === 'string') {
+      // The object serviceEndpoint property can be a string and the value MUST be an origin string
+      if (new URL(descriptor.serviceEndpoint).origin !== descriptor.serviceEndpoint)
+        return Promise.reject({ status: ValidationStatusEnum.INVALID, message: WDCErrors.PROPERTY_SERVICE_ENDPOINT_NOT_CONTAIN_VALID_ORIGIN })
+      if (new URL(descriptor.serviceEndpoint).protocol !== 'https:')
+        return Promise.reject({
+          status: ValidationStatusEnum.INVALID,
+          message: WDCErrors.PROPERTY_ORIGIN_NOT_SECURE
+        })
+    }
 
     if (typeof descriptor.serviceEndpoint === 'object') {
       // The object serviceEndpoint property can be an object which MUST contain an origins property
@@ -395,7 +399,14 @@ export class WellKnownDidVerifier {
    * @param descriptor The endpoint descriptor.
    */
   private getOrigins(descriptor: ServiceEndpoint): Array<string> {
-    return [descriptor.serviceEndpoint]
+    if (typeof descriptor.serviceEndpoint === 'string') {
+      return [descriptor.serviceEndpoint]
+    } else {
+      // This break with did-resolver@3
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      return descriptor.serviceEndpoint.origins;
+    }
   }
 
 }
