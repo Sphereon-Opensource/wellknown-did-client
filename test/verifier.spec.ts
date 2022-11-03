@@ -125,6 +125,22 @@ describe('Domain Linkage Verifier', () => {
       expect(result.status).toEqual(ValidationStatusEnum.VALID);
     });
 
+    it('should verify when serviceEndpoint is an object containing an array of origins', async () => {
+      nock(ORIGIN).get('/.well-known/did-configuration.json').times(1).reply(200, DID_CONFIGURATION);
+
+      const endpointDescriptor: ServiceEndpoint = {
+        id: DID,
+        type: ServiceTypesEnum.LINKED_DOMAINS,
+        // This breaks the types in did-resolver@4
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        serviceEndpoint: { origins: [ORIGIN] },
+      };
+
+      const result = await verifier.verifyEndpointDescriptor({ descriptor: endpointDescriptor });
+      expect(result.status).toEqual(ValidationStatusEnum.VALID);
+    });
+
     it('should verify when serviceEndpoint is of type IServiceEndpoint', async () => {
       nock(ORIGIN).get('/.well-known/did-configuration.json').times(1).reply(200, DID_CONFIGURATION);
 
