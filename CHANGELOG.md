@@ -2,6 +2,15 @@
 
 The well-known DIDs client typescript library is still in an alpha state at this point. Please note that the interfaces might still change a bit as the software still is in active development.
 
+## v0.1.3 - 2023-03-09
+
+- Updated:
+  - Update to latest SSI-types
+  - Move to @sphereon/isomorphic-webcrypto as orignal package isn't maintained anymore and was causing problems in newer RN environments
+- Fixed:
+  - Fix issue when serviceEndpoint is an object, thanks to @jfromaniello for the contribution
+
+
 ## v0.1.2 - 2022-09-01
 
 Fixed:
